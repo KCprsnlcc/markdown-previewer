@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { IconSearch, IconPlus, IconTag, IconX, IconUpload } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconTag, IconX, IconUpload, IconEdit } from '@tabler/icons-react';
 import { MarkdownDocument } from '../supabase';
 
 const Sidebar: React.FC = () => {
@@ -24,7 +24,10 @@ const Sidebar: React.FC = () => {
   const [showTagInput, setShowTagInput] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [renamingDocId, setRenamingDocId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
   
   // Extract all unique tags from all documents
   const allTags = Array.from(
@@ -32,6 +35,13 @@ const Sidebar: React.FC = () => {
       documents.flatMap(doc => doc.tags || [])
     )
   ).sort();
+  
+  useEffect(() => {
+    // Focus the rename input when it becomes visible
+    if (renamingDocId && renameInputRef.current) {
+      renameInputRef.current.focus();
+    }
+  }, [renamingDocId]);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,21 +69,26 @@ const Sidebar: React.FC = () => {
     const files = e.target.files;
     if (files && files.length > 0) {
       processFiles(files);
+      // Reset the input value so the same file can be uploaded again
+      e.target.value = '';
     }
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(true);
   };
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(false);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(false);
     
     const files = e.dataTransfer.files;
@@ -86,29 +101,37 @@ const Sidebar: React.FC = () => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       
-      // Only process markdown files
-      if (file.type === 'text/markdown' || file.name.endsWith('.md')) {
-        const content = await readFileContent(file);
-        
-        // Create a new document with the file content
-        const newDocument: Partial<MarkdownDocument> = {
-          id: crypto.randomUUID(),
-          title: file.name.replace(/\.md$/, ''),
-          content,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          tags: ['imported'],
-          user_id: 'anonymous',
-        };
-        
-        // Set as current document and then update it
-        selectDocument(newDocument as MarkdownDocument);
-        await updateCurrentDocument(content, file.name.replace(/\.md$/, ''), ['imported']);
+      // Accept any file with .md extension or text files that might be markdown
+      if (file.name.endsWith('.md') || file.type === 'text/markdown' || file.type === 'text/plain') {
+        try {
+          const content = await readFileContent(file);
+          
+          // Create a new document with the file content
+          const newDocument: Partial<MarkdownDocument> = {
+            id: crypto.randomUUID(),
+            title: file.name.replace(/\.md$/, ''),
+            content,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            tags: ['imported'],
+            user_id: 'anonymous',
+          };
+          
+          await saveNewDocument(newDocument as MarkdownDocument);
+        } catch (error) {
+          console.error('Error processing file:', error);
+          alert(`Failed to process file: ${file.name}`);
+        }
+      } else {
+        alert(`File type not supported: ${file.name}. Please upload .md files only.`);
       }
     }
-    
-    // Refresh documents list
-    refreshDocuments();
+  };
+
+  const saveNewDocument = async (doc: MarkdownDocument) => {
+    selectDocument(doc);
+    await updateCurrentDocument(doc.content, doc.title, doc.tags);
+    await refreshDocuments();
   };
 
   const readFileContent = (file: File): Promise<string> => {
@@ -121,11 +144,46 @@ const Sidebar: React.FC = () => {
           reject(new Error('Failed to read file'));
         }
       };
-      reader.onerror = (e) => {
+      reader.onerror = () => {
         reject(new Error('File read error'));
       };
       reader.readAsText(file);
     });
+  };
+
+  const startRenaming = (doc: MarkdownDocument, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    setRenamingDocId(doc.id);
+    setRenameValue(doc.title);
+  };
+
+  const handleRename = async (docId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (renameValue.trim() === '') {
+      return; // Don't save empty titles
+    }
+    
+    const docToRename = documents.find(doc => doc.id === docId);
+    if (docToRename) {
+      // If it's the current document, update directly
+      if (currentDocument?.id === docId) {
+        await updateCurrentDocument(currentDocument.content, renameValue, currentDocument.tags);
+      } else {
+        // Otherwise, select it first, then update
+        selectDocument(docToRename);
+        await updateCurrentDocument(docToRename.content, renameValue, docToRename.tags);
+      }
+    }
+    
+    setRenamingDocId(null);
+    await refreshDocuments();
+  };
+  
+  const cancelRenaming = () => {
+    setRenamingDocId(null);
   };
   
   const sidebarStyle: React.CSSProperties = {
@@ -213,6 +271,18 @@ const Sidebar: React.FC = () => {
     alignItems: 'center',
     justifyContent: 'center',
   };
+
+  const iconButtonStyle: React.CSSProperties = {
+    background: 'none',
+    border: 'none',
+    color: darkMode ? '#aaa' : '#666',
+    cursor: 'pointer',
+    padding: '2px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '4px',
+  };
   
   return (
     <div 
@@ -234,7 +304,7 @@ const Sidebar: React.FC = () => {
             type="file" 
             ref={fileInputRef}
             style={{ display: 'none' }} 
-            accept=".md,text/markdown" 
+            accept=".md,.txt,text/markdown,text/plain" 
             onChange={handleFileUpload}
             multiple
           />
@@ -382,51 +452,92 @@ const Sidebar: React.FC = () => {
                 alignItems: 'center'
               }}
             >
-              <div 
-                style={{ 
-                  flex: 1,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  cursor: 'pointer'
-                }} 
-                onClick={() => selectDocument(doc)}
-              >
-                {doc.title}
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (window.confirm(`Are you sure you want to delete "${doc.title}"?`)) {
-                    if (currentDocument?.id === doc.id) {
-                      deleteCurrentDocument();
-                    } else {
-                      selectDocument(doc);
-                      setTimeout(() => deleteCurrentDocument(), 100);
-                    }
-                  }
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: darkMode ? '#aaa' : '#666',
-                  cursor: 'pointer',
-                  padding: '2px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '4px',
-                  visibility: 'hidden'
-                }}
-                title="Delete document"
-                className="document-close-btn"
-              >
-                <IconX size={16} />
-              </button>
+              {renamingDocId === doc.id ? (
+                <form 
+                  onSubmit={(e) => handleRename(doc.id, e)} 
+                  style={{ flex: 1, display: 'flex' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <input
+                    ref={renameInputRef}
+                    type="text"
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    style={{
+                      ...searchInputStyle,
+                      flex: 1,
+                      padding: '0.25rem 0.5rem',
+                    }}
+                    onBlur={() => handleRename(doc.id, { preventDefault: () => {} } as React.FormEvent)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        cancelRenaming();
+                      }
+                    }}
+                  />
+                </form>
+              ) : (
+                <>
+                  <div 
+                    style={{ 
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      cursor: 'pointer'
+                    }} 
+                    onClick={() => selectDocument(doc)}
+                  >
+                    {doc.title}
+                  </div>
+                  <div style={{ display: 'flex' }}>
+                    <button
+                      onClick={(e) => startRenaming(doc, e)}
+                      style={{
+                        ...iconButtonStyle,
+                        marginRight: '4px',
+                        visibility: 'hidden'
+                      }}
+                      title="Rename document"
+                      className="document-action-btn"
+                    >
+                      <IconEdit size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Are you sure you want to delete "${doc.title}"?`)) {
+                          if (currentDocument?.id === doc.id) {
+                            deleteCurrentDocument();
+                          } else {
+                            selectDocument(doc);
+                            setTimeout(() => deleteCurrentDocument(), 100);
+                          }
+                        }
+                      }}
+                      style={{
+                        ...iconButtonStyle,
+                        visibility: 'hidden'
+                      }}
+                      title="Delete document"
+                      className="document-action-btn"
+                    >
+                      <IconX size={16} />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ))
         )}
       </div>
+      <style>
+        {`
+          div:hover > .document-action-btn {
+            visibility: visible !important;
+          }
+        `}
+      </style>
     </div>
   );
 };
