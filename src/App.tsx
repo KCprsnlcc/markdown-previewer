@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { AppProvider } from './context/AppContext';
 import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
@@ -9,8 +9,6 @@ import './App.css';
 
 const App: React.FC = () => {
   const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
-  
-  console.log('App rendering');
   
   return (
     <AppProvider>
@@ -29,10 +27,11 @@ interface AppContentProps {
   setSettingsPanelOpen: (open: boolean) => void;
 }
 
-const AppContent: React.FC<AppContentProps> = ({ 
+// Use memo to prevent unnecessary re-renders
+const AppContent = memo(({ 
   settingsPanelOpen, 
   setSettingsPanelOpen 
-}) => {
+}: AppContentProps) => {
   const {
     currentDocument,
     updateCurrentDocument,
@@ -42,145 +41,159 @@ const AppContent: React.FC<AppContentProps> = ({
     hideSidebar
   } = require('./context/AppContext').useAppContext();
   
-  console.log('AppContent rendering');
-  console.log('Current document:', currentDocument);
-  
   // States for scroll synchronization
   const [editorScrollPosition, setEditorScrollPosition] = useState<number | undefined>(undefined);
   const [previewScrollPosition, setPreviewScrollPosition] = useState<number | undefined>(undefined);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const scrollSourceRef = useRef<'editor' | 'preview' | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   
-  const containerStyle: React.CSSProperties = {
+  // Memoize styles to prevent recalculations on every render
+  const containerStyle = React.useMemo<React.CSSProperties>(() => ({
     display: 'flex',
     height: '100vh',
     width: '100%',
     overflow: 'hidden',
     backgroundColor: darkMode ? '#121212' : '#f8f9fa',
     color: darkMode ? '#e0e0e0' : '#333',
-  };
+  }), [darkMode]);
   
-  const mainContainerStyle: React.CSSProperties = {
+  const mainContainerStyle = React.useMemo<React.CSSProperties>(() => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-  };
+  }), []);
   
-  const toolbarStyle: React.CSSProperties = {
+  const toolbarStyle = React.useMemo<React.CSSProperties>(() => ({
     display: 'flex',
     justifyContent: 'flex-end',
     padding: '0.5rem 1rem',
     borderBottom: '1px solid #e0e0e0',
     backgroundColor: darkMode ? '#1a1a1a' : '#fff',
-  };
+  }), [darkMode]);
   
-  const contentContainerStyle: React.CSSProperties = {
+  const contentContainerStyle = React.useMemo<React.CSSProperties>(() => ({
     flex: 1,
     display: 'flex',
     overflow: 'hidden',
-    position: 'relative', // For positioning the scroll to top button
-  };
+    position: 'relative',
+  }), []);
   
-  const panelStyle: React.CSSProperties = {
+  const panelStyle = React.useMemo<React.CSSProperties>(() => ({
     flex: 1,
     height: '100%',
     overflow: 'auto',
     borderRight: '1px solid #e0e0e0',
-  };
+  }), []);
   
-  const handleDocumentChange = (content: string) => {
+  // Memoize document change handler
+  const handleDocumentChange = useCallback((content: string) => {
     if (currentDocument) {
       updateCurrentDocument(content);
     }
-  };
+  }, [currentDocument, updateCurrentDocument]);
 
-  // Handle Editor scroll
-  const handleEditorScroll = (scrollInfo: { scrollTop: number, scrollHeight: number, clientHeight: number }) => {
+  // Debounce scroll events for better performance
+  const debounceScroll = useCallback((callback: () => void, delay: number = 10) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      callback();
+    }, delay);
+  }, []);
+
+  // Optimized Editor scroll handler
+  const handleEditorScroll = useCallback((scrollInfo: { scrollTop: number, scrollHeight: number, clientHeight: number }) => {
     if (scrollSourceRef.current === 'preview') return;
     
     scrollSourceRef.current = 'editor';
     
-    // Calculate scroll percentage
-    const scrollPercentage = scrollInfo.scrollTop / (scrollInfo.scrollHeight - scrollInfo.clientHeight);
-    
-    // Update preview scroll position if preview is visible
-    if (!hidePreview) {
-      const previewElement = document.querySelector('.previewer-container');
-      if (previewElement) {
-        const previewScrollHeight = previewElement.scrollHeight;
-        const previewClientHeight = previewElement.clientHeight;
-        const previewTargetScrollTop = scrollPercentage * (previewScrollHeight - previewClientHeight);
-        
-        setPreviewScrollPosition(previewTargetScrollTop);
+    debounceScroll(() => {
+      // Calculate scroll percentage
+      const scrollPercentage = scrollInfo.scrollTop / (scrollInfo.scrollHeight - scrollInfo.clientHeight);
+      
+      // Update preview scroll position if preview is visible
+      if (!hidePreview) {
+        const previewElement = document.querySelector('.previewer-container');
+        if (previewElement) {
+          const previewScrollHeight = previewElement.scrollHeight;
+          const previewClientHeight = previewElement.clientHeight;
+          const previewTargetScrollTop = scrollPercentage * (previewScrollHeight - previewClientHeight);
+          
+          setPreviewScrollPosition(previewTargetScrollTop);
+        }
       }
-    }
-    
-    // Show or hide scroll to top button
-    setShowScrollToTop(scrollInfo.scrollTop > 300);
+      
+      // Show or hide scroll to top button
+      setShowScrollToTop(scrollInfo.scrollTop > 300);
+    });
     
     // Reset scroll source after a short delay
     setTimeout(() => {
       scrollSourceRef.current = null;
     }, 50);
-  };
+  }, [hidePreview, debounceScroll]);
   
-  // Handle Preview scroll
-  const handlePreviewScroll = (scrollInfo: { scrollTop: number, scrollHeight: number, clientHeight: number }) => {
+  // Optimized Preview scroll handler
+  const handlePreviewScroll = useCallback((scrollInfo: { scrollTop: number, scrollHeight: number, clientHeight: number }) => {
     if (scrollSourceRef.current === 'editor') return;
     
     scrollSourceRef.current = 'preview';
     
-    // Calculate scroll percentage
-    const scrollPercentage = scrollInfo.scrollTop / (scrollInfo.scrollHeight - scrollInfo.clientHeight);
-    
-    // Update editor scroll position if editor is visible
-    if (!hideEditor) {
-      const editorElement = document.querySelector('textarea');
-      if (editorElement) {
-        const editorScrollHeight = editorElement.scrollHeight;
-        const editorClientHeight = editorElement.clientHeight;
-        const editorTargetScrollTop = scrollPercentage * (editorScrollHeight - editorClientHeight);
-        
-        setEditorScrollPosition(editorTargetScrollTop);
+    debounceScroll(() => {
+      // Calculate scroll percentage
+      const scrollPercentage = scrollInfo.scrollTop / (scrollInfo.scrollHeight - scrollInfo.clientHeight);
+      
+      // Update editor scroll position if editor is visible
+      if (!hideEditor) {
+        const editorElement = document.querySelector('textarea');
+        if (editorElement) {
+          const editorScrollHeight = editorElement.scrollHeight;
+          const editorClientHeight = editorElement.clientHeight;
+          const editorTargetScrollTop = scrollPercentage * (editorScrollHeight - editorClientHeight);
+          
+          setEditorScrollPosition(editorTargetScrollTop);
+        }
       }
-    }
-    
-    // Show or hide scroll to top button
-    setShowScrollToTop(scrollInfo.scrollTop > 300);
+      
+      // Show or hide scroll to top button
+      setShowScrollToTop(scrollInfo.scrollTop > 300);
+    });
     
     // Reset scroll source after a short delay
     setTimeout(() => {
       scrollSourceRef.current = null;
     }, 50);
-  };
+  }, [hideEditor, debounceScroll]);
   
-  // Scroll to top function
-  const handleScrollToTop = () => {
+  // Memoized scroll to top function
+  const handleScrollToTop = useCallback(() => {
     setEditorScrollPosition(0);
     setPreviewScrollPosition(0);
     setShowScrollToTop(false);
-  };
+  }, []);
+  
+  // Clean up timers
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
   
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} className="optimize-gpu">
       {!hideSidebar && <Sidebar />}
       
       <div style={mainContainerStyle}>
         <div style={toolbarStyle}>
           <button
             onClick={() => setSettingsPanelOpen(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem',
-              borderRadius: '4px',
-              border: 'none',
-              backgroundColor: darkMode ? '#333' : '#f0f0f0',
-              color: darkMode ? '#e0e0e0' : '#333',
-              cursor: 'pointer',
-            }}
+            className="btn btn-secondary"
           >
             <IconSettings size={18} />
             Settings
@@ -191,7 +204,7 @@ const AppContent: React.FC<AppContentProps> = ({
           {currentDocument ? (
             <>
               {!hideEditor && (
-                <div style={panelStyle}>
+                <div style={panelStyle} className="optimize-gpu">
                   <Editor 
                     content={currentDocument.content} 
                     onChange={handleDocumentChange}
@@ -202,7 +215,7 @@ const AppContent: React.FC<AppContentProps> = ({
               )}
               
               {!hidePreview && (
-                <div style={panelStyle}>
+                <div style={panelStyle} className="optimize-gpu">
                   <Previewer 
                     content={currentDocument.content}
                     onScroll={handlePreviewScroll}
@@ -210,73 +223,40 @@ const AppContent: React.FC<AppContentProps> = ({
                   />
                 </div>
               )}
-              
-              {hideEditor && hidePreview && (
-                <div 
-                  style={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    flex: 1,
-                    flexDirection: 'column',
-                    gap: '1rem',
-                    padding: '2rem',
-                    textAlign: 'center',
-                  }}
-                >
-                  <h2>Both Editor and Preview are hidden</h2>
-                  <p>Open the settings panel to show at least one component.</p>
-                </div>
-              )}
-              
-              {/* Scroll to top button */}
-              {showScrollToTop && (
-                <button
-                  className="scroll-to-top-button"
-                  onClick={handleScrollToTop}
-                  title="Scroll to top"
-                  style={{
-                    position: 'absolute',
-                    bottom: '1rem',
-                    right: '1rem',
-                    backgroundColor: darkMode ? '#333' : '#f0f0f0',
-                    color: darkMode ? '#e0e0e0' : '#333',
-                    border: 'none',
-                    padding: '0.5rem',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <IconArrowUp size={20} />
-                </button>
-              )}
             </>
           ) : (
-            <div 
-              style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                flex: 1,
-                flexDirection: 'column',
-                gap: '1rem',
-                padding: '2rem',
-                textAlign: 'center',
-              }}
-            >
-              <h2>No Document Selected</h2>
-              <p>Select a document from the sidebar or create a new one.</p>
+            <div className="fade-in" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              width: '100%',
+              padding: '2rem',
+              textAlign: 'center',
+            }}>
+              <h2 style={{ marginBottom: '1rem' }}>Welcome to Markdown Previewer</h2>
+              <p>Create a new document or select an existing one from the sidebar to get started.</p>
             </div>
           )}
         </div>
       </div>
       
-      <SettingsPanel 
-        isOpen={settingsPanelOpen} 
-        onClose={() => setSettingsPanelOpen(false)} 
-      />
+      {settingsPanelOpen && (
+        <SettingsPanel isOpen={settingsPanelOpen} onClose={() => setSettingsPanelOpen(false)} />
+      )}
+      
+      {showScrollToTop && (
+        <button 
+          onClick={handleScrollToTop}
+          className={`scroll-to-top-button visible`}
+          aria-label="Scroll to top"
+        >
+          <IconArrowUp size={20} />
+        </button>
+      )}
     </div>
   );
-};
+});
 
 export default App;

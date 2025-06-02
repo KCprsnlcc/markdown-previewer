@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -28,7 +28,8 @@ interface PreviewerProps {
   scrollToPosition?: number;
 }
 
-const Previewer: React.FC<PreviewerProps> = ({ content, onScroll, scrollToPosition }) => {
+// Use memo to prevent unnecessary re-renders
+const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps) => {
   const {
     fontSize,
     previewTheme,
@@ -37,55 +38,82 @@ const Previewer: React.FC<PreviewerProps> = ({ content, onScroll, scrollToPositi
   
   const previewerRef = useRef<HTMLDivElement>(null);
   const isScrolling = useRef(false);
+  const contentRef = useRef(content);
   
-  // Apply syntax highlighting after rendering
+  // Apply syntax highlighting after rendering with debouncing
   useEffect(() => {
-    Prism.highlightAll();
+    // Only highlight if content actually changed
+    if (contentRef.current !== content) {
+      contentRef.current = content;
+      
+      // Use requestIdleCallback for better performance (or setTimeout as fallback)
+      const highlightCode = () => {
+        // Only run Prism if the element is still in the DOM
+        if (previewerRef.current && previewerRef.current.querySelectorAll('pre code').length > 0) {
+          Prism.highlightAllUnder(previewerRef.current);
+        }
+      };
+      
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(highlightCode, { timeout: 300 });
+      } else {
+        setTimeout(highlightCode, 100);
+      }
+    }
   }, [content]);
   
-  // Handle scroll synchronization
+  // Optimized scroll handler with requestAnimationFrame
   const handleScroll = useCallback(() => {
-    if (previewerRef.current && !isScrolling.current) {
-      const { scrollTop, scrollHeight, clientHeight } = previewerRef.current;
-      if (onScroll) {
-        onScroll({ scrollTop, scrollHeight, clientHeight });
-      }
+    if (previewerRef.current && !isScrolling.current && onScroll) {
+      requestAnimationFrame(() => {
+        if (previewerRef.current) {
+          const { scrollTop, scrollHeight, clientHeight } = previewerRef.current;
+          onScroll({ scrollTop, scrollHeight, clientHeight });
+        }
+      });
     }
   }, [onScroll]);
 
-  // Add scroll event listener
+  // Add scroll event listener with passive option for performance
   useEffect(() => {
     const previewer = previewerRef.current;
-    if (previewer) {
-      previewer.addEventListener('scroll', handleScroll);
+    if (previewer && onScroll) {
+      previewer.addEventListener('scroll', handleScroll, { passive: true });
     }
     return () => {
-      if (previewer) {
+      if (previewer && onScroll) {
         previewer.removeEventListener('scroll', handleScroll);
       }
     };
-  }, [handleScroll]);
+  }, [handleScroll, onScroll]);
 
-  // Handle external scroll requests
+  // Handle external scroll requests with requestAnimationFrame
   useEffect(() => {
     if (scrollToPosition !== undefined && previewerRef.current) {
       isScrolling.current = true;
-      previewerRef.current.scrollTop = scrollToPosition;
-      // Reset the flag after a short delay to avoid scroll loops
-      setTimeout(() => {
-        isScrolling.current = false;
-      }, 50);
+      
+      requestAnimationFrame(() => {
+        if (previewerRef.current) {
+          previewerRef.current.scrollTop = scrollToPosition;
+        }
+        
+        // Reset the flag after a short delay to avoid scroll loops
+        setTimeout(() => {
+          isScrolling.current = false;
+        }, 50);
+      });
     }
   }, [scrollToPosition]);
   
-  // Preview themes
-  const getPreviewThemeStyles = (): React.CSSProperties => {
+  // Memoized preview theme styles
+  const previewThemeStyles = useMemo((): React.CSSProperties => {
     const baseStyles: React.CSSProperties = {
       fontSize: `${fontSize}px`,
       lineHeight: '1.6',
       padding: '1rem',
       height: '100%',
       overflow: 'auto',
+      transition: 'background-color 0.3s ease, color 0.3s ease',
     };
     
     // Apply theme-specific styles
@@ -167,78 +195,65 @@ const Previewer: React.FC<PreviewerProps> = ({ content, onScroll, scrollToPositi
           backgroundColor: darkMode ? '#2d2d2d' : '#ffffff',
         };
     }
-  };
+  }, [fontSize, previewTheme, darkMode]);
+  
+  // Memoized component renderers for better performance
+  const componentRenderers = useMemo(() => ({
+    h1: ({ children, ...props }: any) => (
+      <h1 style={{ borderBottom: '1px solid #ddd', paddingBottom: '0.3em' }} {...props}>
+        {children}
+      </h1>
+    ),
+    h2: ({ children, ...props }: any) => (
+      <h2 style={{ borderBottom: '1px solid #ddd', paddingBottom: '0.3em' }} {...props}>
+        {children}
+      </h2>
+    ),
+    blockquote: ({ children, ...props }: any) => (
+      <blockquote 
+        style={{ 
+          borderLeft: '4px solid #ddd', 
+          paddingLeft: '1em', 
+          color: '#6a737d',
+          margin: '1em 0'
+        }} 
+        {...props}
+      >
+        {children}
+      </blockquote>
+    ),
+    code: (props: any) => {
+      const { children, className, node, ...rest } = props;
+      const match = /language-(\w+)/.exec(className || '');
+      return match ? (
+        <pre className={className} style={{ margin: '1em 0' }}>
+          <code className={className} {...rest}>
+            {children}
+          </code>
+        </pre>
+      ) : (
+        <code className={className} {...rest}>
+          {children}
+        </code>
+      );
+    }
+  }), []);
   
   return (
-    <div className="previewer-container" style={getPreviewThemeStyles()} ref={previewerRef}>
+    <div 
+      className="previewer-container optimize-gpu" 
+      style={previewThemeStyles} 
+      ref={previewerRef}
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, rehypeSanitize]}
-        components={{
-          h1: ({ children, ...props }) => (
-            <h1 style={{ borderBottom: '1px solid #ddd', paddingBottom: '0.3em' }} {...props}>
-              {children}
-            </h1>
-          ),
-          h2: ({ children, ...props }) => (
-            <h2 style={{ borderBottom: '1px solid #ddd', paddingBottom: '0.3em' }} {...props}>
-              {children}
-            </h2>
-          ),
-          blockquote: ({ children, ...props }) => (
-            <blockquote 
-              style={{ 
-                borderLeft: '4px solid #ddd', 
-                paddingLeft: '1em', 
-                color: '#6a737d',
-                margin: '1em 0'
-              }} 
-              {...props}
-            >
-              {children}
-            </blockquote>
-          ),
-          code: (props) => {
-            const { className, children, ...rest } = props;
-            // @ts-ignore - inline is a valid prop for code elements in react-markdown
-            const inline = props.inline;
-            const match = /language-(\w+)/.exec(className || '');
-            
-            // Inline code should be rendered inside a span or another inline element
-            // Block code should be completely separate from paragraphs
-            if (!inline) {
-              // This is a code block - render outside of any paragraph
-              return (
-                <pre className={className} style={{ borderRadius: '4px', padding: '1em', overflow: 'auto' }}>
-                  <code className={match ? `language-${match[1]}` : ''} {...rest}>
-                    {children}
-                  </code>
-                </pre>
-              );
-            } else {
-              // This is inline code - render inside the parent element
-              return (
-                <code 
-                  className={className} 
-                  style={{ 
-                    backgroundColor: darkMode ? '#2d2d2d' : '#f6f8fa',
-                    padding: '0.2em 0.4em',
-                    borderRadius: '3px',
-                    fontSize: '85%'
-                  }} 
-                  {...rest}
-                >
-                  {children}
-                </code>
-              );
-            }
-          }
-        }}
+        components={componentRenderers}
       >
         {content}
       </ReactMarkdown>
     </div>
   );
-};
+});
 
 export default Previewer;
