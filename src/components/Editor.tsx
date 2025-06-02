@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { IconSave } from '@tabler/icons-react';
+import { IconDeviceFloppy } from '@tabler/icons-react';
 
 interface EditorProps {
   content: string;
@@ -96,7 +96,7 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
             gap: '0.5rem',
           }}
         >
-          <IconSave size={16} />
+          <IconDeviceFloppy size={16} />
           Save
         </button>
       )}

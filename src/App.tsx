@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider } from './context/AppContext';
 import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
@@ -9,6 +9,8 @@ import './App.css';
 
 const App: React.FC = () => {
   const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
+  
+  console.log('App rendering');
   
   return (
     <AppProvider>
@@ -36,6 +38,9 @@ const AppContent: React.FC<AppContentProps> = ({
     updateCurrentDocument,
     darkMode
   } = require('./context/AppContext').useAppContext();
+  
+  console.log('AppContent rendering');
+  console.log('Current document:', currentDocument);
   
   const containerStyle: React.CSSProperties = {
     display: 'flex',
