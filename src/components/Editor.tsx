@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { IconDeviceFloppy } from '@tabler/icons-react';
 
 interface EditorProps {
   content: string;
   onChange: (content: string) => void;
+  onScroll?: (scrollInfo: { scrollTop: number, scrollHeight: number, clientHeight: number }) => void;
+  scrollToPosition?: number;
 }
 
-const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
+const Editor: React.FC<EditorProps> = ({ content, onChange, onScroll, scrollToPosition }) => {
   const {
     fontSize,
     editorTheme,
@@ -17,6 +19,7 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   const [value, setValue] = useState(content);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isScrolling = useRef(false);
   
   // Update local state when the prop changes
   useEffect(() => {
@@ -41,6 +44,41 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       }
     };
   }, [autoSave, value, content, onChange]);
+
+  // Handle scroll synchronization
+  const handleScroll = useCallback(() => {
+    if (editorRef.current && !isScrolling.current) {
+      const { scrollTop, scrollHeight, clientHeight } = editorRef.current;
+      if (onScroll) {
+        onScroll({ scrollTop, scrollHeight, clientHeight });
+      }
+    }
+  }, [onScroll]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (editor) {
+      editor.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      if (editor) {
+        editor.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [handleScroll]);
+
+  // Handle external scroll requests
+  useEffect(() => {
+    if (scrollToPosition !== undefined && editorRef.current) {
+      isScrolling.current = true;
+      editorRef.current.scrollTop = scrollToPosition;
+      // Reset the flag after a short delay to avoid scroll loops
+      setTimeout(() => {
+        isScrolling.current = false;
+      }, 50);
+    }
+  }, [scrollToPosition]);
   
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value);

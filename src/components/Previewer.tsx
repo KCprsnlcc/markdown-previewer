@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -24,19 +24,59 @@ import 'prismjs/components/prism-yaml';
 
 interface PreviewerProps {
   content: string;
+  onScroll?: (scrollInfo: { scrollTop: number, scrollHeight: number, clientHeight: number }) => void;
+  scrollToPosition?: number;
 }
 
-const Previewer: React.FC<PreviewerProps> = ({ content }) => {
+const Previewer: React.FC<PreviewerProps> = ({ content, onScroll, scrollToPosition }) => {
   const {
     fontSize,
     previewTheme,
     darkMode,
   } = useAppContext();
   
+  const previewerRef = useRef<HTMLDivElement>(null);
+  const isScrolling = useRef(false);
+  
   // Apply syntax highlighting after rendering
   useEffect(() => {
     Prism.highlightAll();
   }, [content]);
+  
+  // Handle scroll synchronization
+  const handleScroll = useCallback(() => {
+    if (previewerRef.current && !isScrolling.current) {
+      const { scrollTop, scrollHeight, clientHeight } = previewerRef.current;
+      if (onScroll) {
+        onScroll({ scrollTop, scrollHeight, clientHeight });
+      }
+    }
+  }, [onScroll]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const previewer = previewerRef.current;
+    if (previewer) {
+      previewer.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      if (previewer) {
+        previewer.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [handleScroll]);
+
+  // Handle external scroll requests
+  useEffect(() => {
+    if (scrollToPosition !== undefined && previewerRef.current) {
+      isScrolling.current = true;
+      previewerRef.current.scrollTop = scrollToPosition;
+      // Reset the flag after a short delay to avoid scroll loops
+      setTimeout(() => {
+        isScrolling.current = false;
+      }, 50);
+    }
+  }, [scrollToPosition]);
   
   // Preview themes
   const getPreviewThemeStyles = (): React.CSSProperties => {
@@ -130,7 +170,7 @@ const Previewer: React.FC<PreviewerProps> = ({ content }) => {
   };
   
   return (
-    <div className="previewer-container" style={getPreviewThemeStyles()}>
+    <div className="previewer-container" style={getPreviewThemeStyles()} ref={previewerRef}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, rehypeSanitize]}
