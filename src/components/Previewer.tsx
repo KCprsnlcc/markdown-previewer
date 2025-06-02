@@ -57,6 +57,40 @@ const Previewer: React.FC<PreviewerProps> = ({ content }) => {
           color: darkMode ? '#c9d1d9' : '#24292e',
           backgroundColor: darkMode ? '#0d1117' : '#ffffff',
         };
+        
+      case 'github-dark':
+        return {
+          ...baseStyles,
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+          color: '#c9d1d9',
+          backgroundColor: '#0d1117',
+        };
+      
+      case 'atom-one-dark':
+        return {
+          ...baseStyles,
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          color: '#abb2bf',
+          backgroundColor: '#282c34',
+        };
+      
+      case 'atom-one-light':
+        return {
+          ...baseStyles,
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          color: '#383a42',
+          backgroundColor: '#fafafa',
+        };
+      
+      case 'space-invader':
+        return {
+          ...baseStyles,
+          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+          color: '#16e0bd',
+          backgroundColor: '#1a1a2e',
+          border: '1px solid #16e0bd',
+          borderRadius: '4px',
+        };
       
       case 'documentation':
         return {
@@ -129,26 +163,35 @@ const Previewer: React.FC<PreviewerProps> = ({ content }) => {
             // @ts-ignore - inline is a valid prop for code elements in react-markdown
             const inline = props.inline;
             const match = /language-(\w+)/.exec(className || '');
-            return !inline ? (
-              <pre className={className} style={{ borderRadius: '4px', padding: '1em', overflow: 'auto' }}>
-                <code className={match ? `language-${match[1]}` : ''} {...props}>
+            
+            // Inline code should be rendered inside a span or another inline element
+            // Block code should be completely separate from paragraphs
+            if (!inline) {
+              // This is a code block - render outside of any paragraph
+              return (
+                <pre className={className} style={{ borderRadius: '4px', padding: '1em', overflow: 'auto' }}>
+                  <code className={match ? `language-${match[1]}` : ''} {...rest}>
+                    {children}
+                  </code>
+                </pre>
+              );
+            } else {
+              // This is inline code - render inside the parent element
+              return (
+                <code 
+                  className={className} 
+                  style={{ 
+                    backgroundColor: darkMode ? '#2d2d2d' : '#f6f8fa',
+                    padding: '0.2em 0.4em',
+                    borderRadius: '3px',
+                    fontSize: '85%'
+                  }} 
+                  {...rest}
+                >
                   {children}
                 </code>
-              </pre>
-            ) : (
-              <code 
-                className={className} 
-                style={{ 
-                  backgroundColor: darkMode ? '#2d2d2d' : '#f6f8fa',
-                  padding: '0.2em 0.4em',
-                  borderRadius: '3px',
-                  fontSize: '85%'
-                }} 
-                {...props}
-              >
-                {children}
-              </code>
-            );
+              );
+            }
           }
         }}
       >

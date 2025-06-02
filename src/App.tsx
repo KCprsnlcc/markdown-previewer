@@ -36,7 +36,10 @@ const AppContent: React.FC<AppContentProps> = ({
   const {
     currentDocument,
     updateCurrentDocument,
-    darkMode
+    darkMode,
+    hideEditor,
+    hidePreview,
+    hideSidebar
   } = require('./context/AppContext').useAppContext();
   
   console.log('AppContent rendering');
@@ -87,7 +90,7 @@ const AppContent: React.FC<AppContentProps> = ({
   
   return (
     <div style={containerStyle}>
-      <Sidebar />
+      {!hideSidebar && <Sidebar />}
       
       <div style={mainContainerStyle}>
         <div style={toolbarStyle}>
@@ -113,16 +116,38 @@ const AppContent: React.FC<AppContentProps> = ({
         <div style={contentContainerStyle}>
           {currentDocument ? (
             <>
-              <div style={panelStyle}>
-                <Editor 
-                  content={currentDocument.content} 
-                  onChange={handleDocumentChange} 
-                />
-              </div>
+              {!hideEditor && (
+                <div style={panelStyle}>
+                  <Editor 
+                    content={currentDocument.content} 
+                    onChange={handleDocumentChange} 
+                  />
+                </div>
+              )}
               
-              <div style={panelStyle}>
-                <Previewer content={currentDocument.content} />
-              </div>
+              {!hidePreview && (
+                <div style={panelStyle}>
+                  <Previewer content={currentDocument.content} />
+                </div>
+              )}
+              
+              {hideEditor && hidePreview && (
+                <div 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    flex: 1,
+                    flexDirection: 'column',
+                    gap: '1rem',
+                    padding: '2rem',
+                    textAlign: 'center',
+                  }}
+                >
+                  <h2>Both Editor and Preview are hidden</h2>
+                  <p>Open the settings panel to show at least one component.</p>
+                </div>
+              )}
             </>
           ) : (
             <div 

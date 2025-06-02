@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { IconSearch, IconPlus, IconTag, IconX } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconTag, IconX, IconUpload } from '@tabler/icons-react';
+import { MarkdownDocument } from '../supabase';
 
 const Sidebar: React.FC = () => {
   const {
@@ -14,11 +15,16 @@ const Sidebar: React.FC = () => {
     setSelectedTags,
     selectDocument,
     createNewDocument,
+    deleteCurrentDocument,
+    updateCurrentDocument,
+    refreshDocuments,
   } = useAppContext();
   
   const [searchValue, setSearchValue] = useState(searchQuery);
   const [showTagInput, setShowTagInput] = useState(false);
   const [tagInput, setTagInput] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Extract all unique tags from all documents
   const allTags = Array.from(
@@ -47,6 +53,79 @@ const Sidebar: React.FC = () => {
       setTagInput('');
       setShowTagInput(false);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      processFiles(files);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      processFiles(files);
+    }
+  };
+
+  const processFiles = async (files: FileList) => {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Only process markdown files
+      if (file.type === 'text/markdown' || file.name.endsWith('.md')) {
+        const content = await readFileContent(file);
+        
+        // Create a new document with the file content
+        const newDocument: Partial<MarkdownDocument> = {
+          id: crypto.randomUUID(),
+          title: file.name.replace(/\.md$/, ''),
+          content,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          tags: ['imported'],
+          user_id: 'anonymous',
+        };
+        
+        // Set as current document and then update it
+        selectDocument(newDocument as MarkdownDocument);
+        await updateCurrentDocument(content, file.name.replace(/\.md$/, ''), ['imported']);
+      }
+    }
+    
+    // Refresh documents list
+    refreshDocuments();
+  };
+
+  const readFileContent = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target && typeof e.target.result === 'string') {
+          resolve(e.target.result);
+        } else {
+          reject(new Error('Failed to read file'));
+        }
+      };
+      reader.onerror = (e) => {
+        reject(new Error('File read error'));
+      };
+      reader.readAsText(file);
+    });
   };
   
   const sidebarStyle: React.CSSProperties = {
@@ -136,16 +215,44 @@ const Sidebar: React.FC = () => {
   };
   
   return (
-    <div style={sidebarStyle}>
+    <div 
+      style={{
+        ...sidebarStyle,
+        ...(isDragging && {
+          backgroundColor: darkMode ? '#2a2a2a' : '#e9f0f7',
+          borderColor: '#4caf50',
+        })
+      }}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <div style={headerStyle}>
         <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Documents</h2>
-        <button 
-          style={buttonStyle} 
-          onClick={createNewDocument}
-          title="Create New Document"
-        >
-          <IconPlus size={18} />
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            style={{ display: 'none' }} 
+            accept=".md,text/markdown" 
+            onChange={handleFileUpload}
+            multiple
+          />
+          <button 
+            style={buttonStyle} 
+            onClick={() => fileInputRef.current?.click()}
+            title="Import Markdown File"
+          >
+            <IconUpload size={18} />
+          </button>
+          <button 
+            style={buttonStyle} 
+            onClick={createNewDocument}
+            title="Create New Document"
+          >
+            <IconPlus size={18} />
+          </button>
+        </div>
       </div>
       
       <div style={searchContainerStyle}>
@@ -268,10 +375,54 @@ const Sidebar: React.FC = () => {
           documents.map(doc => (
             <div
               key={doc.id}
-              style={documentItemStyle(currentDocument?.id === doc.id)}
-              onClick={() => selectDocument(doc)}
+              style={{
+                ...documentItemStyle(currentDocument?.id === doc.id),
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
             >
-              {doc.title}
+              <div 
+                style={{ 
+                  flex: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer'
+                }} 
+                onClick={() => selectDocument(doc)}
+              >
+                {doc.title}
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (window.confirm(`Are you sure you want to delete "${doc.title}"?`)) {
+                    if (currentDocument?.id === doc.id) {
+                      deleteCurrentDocument();
+                    } else {
+                      selectDocument(doc);
+                      setTimeout(() => deleteCurrentDocument(), 100);
+                    }
+                  }
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: darkMode ? '#aaa' : '#666',
+                  cursor: 'pointer',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '4px',
+                  visibility: 'hidden'
+                }}
+                title="Delete document"
+                className="document-close-btn"
+              >
+                <IconX size={16} />
+              </button>
             </div>
           ))
         )}

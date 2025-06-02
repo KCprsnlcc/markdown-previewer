@@ -14,11 +14,17 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
     fontSize,
     autoSave,
     darkMode,
+    hideEditor,
+    hidePreview,
+    hideSidebar,
     setEditorTheme,
     setPreviewTheme,
     setFontSize,
     setAutoSave,
     setDarkMode,
+    setHideEditor,
+    setHidePreview,
+    setHideSidebar,
   } = useAppContext();
   
   if (!isOpen) return null;
@@ -164,8 +170,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
             >
               <option value="default">Default</option>
               <option value="github">GitHub</option>
-              <option value="dark">Dark</option>
+              <option value="github-dark">GitHub Dark</option>
+              <option value="atom-one-dark">Atom One Dark</option>
+              <option value="atom-one-light">Atom One Light</option>
+              <option value="space-invader">Space Invader</option>
+              <option value="dracula">Dracula</option>
               <option value="monokai">Monokai</option>
+              <option value="nord">Nord</option>
             </select>
           </div>
           
@@ -180,10 +191,63 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
             >
               <option value="default">Default</option>
               <option value="github">GitHub</option>
+              <option value="github-dark">GitHub Dark</option>
+              <option value="atom-one-dark">Atom One Dark</option>
+              <option value="atom-one-light">Atom One Light</option>
+              <option value="space-invader">Space Invader</option>
               <option value="documentation">Documentation</option>
               <option value="minimal">Minimal</option>
               <option value="sepia">Sepia</option>
             </select>
+          </div>
+        </div>
+        
+        <div style={sectionStyle}>
+          <h3>Layout</h3>
+          
+          <div style={switchContainerStyle}>
+            <p style={switchLabelStyle}>Hide Editor</p>
+            <label style={switchStyle}>
+              <input
+                type="checkbox"
+                checked={hideEditor}
+                onChange={(e) => setHideEditor(e.target.checked)}
+                style={switchInputStyle}
+              />
+              <span style={sliderStyle(hideEditor)}>
+                <span style={sliderKnobStyle(hideEditor)}></span>
+              </span>
+            </label>
+          </div>
+          
+          <div style={switchContainerStyle}>
+            <p style={switchLabelStyle}>Hide Preview</p>
+            <label style={switchStyle}>
+              <input
+                type="checkbox"
+                checked={hidePreview}
+                onChange={(e) => setHidePreview(e.target.checked)}
+                style={switchInputStyle}
+              />
+              <span style={sliderStyle(hidePreview)}>
+                <span style={sliderKnobStyle(hidePreview)}></span>
+              </span>
+            </label>
+          </div>
+          
+          <div style={switchContainerStyle}>
+            <p style={switchLabelStyle}>Hide Sidebar</p>
+            <label style={switchStyle}>
+              <input
+                type="checkbox"
+                checked={hideSidebar}
+                onChange={(e) => setHideSidebar(e.target.checked)}
+                style={switchInputStyle}
+              />
+              <span style={sliderStyle(hideSidebar)}>
+                <span style={sliderKnobStyle(hideSidebar)}></span>
+              </span>
+            </label>
           </div>
         </div>
         

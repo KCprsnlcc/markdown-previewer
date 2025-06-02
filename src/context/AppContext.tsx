@@ -12,6 +12,9 @@ interface AppContextType {
   fontSize: number;
   autoSave: boolean;
   darkMode: boolean;
+  hideEditor: boolean;
+  hidePreview: boolean;
+  hideSidebar: boolean;
   
   // Methods
   setSearchQuery: (query: string) => void;
@@ -21,6 +24,9 @@ interface AppContextType {
   setFontSize: (size: number) => void;
   setAutoSave: (autoSave: boolean) => void;
   setDarkMode: (darkMode: boolean) => void;
+  setHideEditor: (hide: boolean) => void;
+  setHidePreview: (hide: boolean) => void;
+  setHideSidebar: (hide: boolean) => void;
   selectDocument: (document: MarkdownDocument) => void;
   createNewDocument: () => void;
   updateCurrentDocument: (content: string, title?: string, tags?: string[]) => Promise<void>;
@@ -39,6 +45,9 @@ const defaultContext: AppContextType = {
   fontSize: 14,
   autoSave: true,
   darkMode: false,
+  hideEditor: false,
+  hidePreview: false,
+  hideSidebar: false,
   
   setSearchQuery: () => {},
   setSelectedTags: () => {},
@@ -47,6 +56,9 @@ const defaultContext: AppContextType = {
   setFontSize: () => {},
   setAutoSave: () => {},
   setDarkMode: () => {},
+  setHideEditor: () => {},
+  setHidePreview: () => {},
+  setHideSidebar: () => {},
   selectDocument: () => {},
   createNewDocument: () => {},
   updateCurrentDocument: async () => {},
@@ -75,6 +87,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [fontSize, setFontSize] = useState<number>(14);
   const [autoSave, setAutoSave] = useState<boolean>(true);
   const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [hideEditor, setHideEditor] = useState<boolean>(false);
+  const [hidePreview, setHidePreview] = useState<boolean>(false);
+  const [hideSidebar, setHideSidebar] = useState<boolean>(false);
   
   // Load documents when search or tags change
   useEffect(() => {
@@ -169,6 +184,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     fontSize,
     autoSave,
     darkMode,
+    hideEditor,
+    hidePreview,
+    hideSidebar,
     
     setSearchQuery,
     setSelectedTags,
@@ -177,6 +195,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setFontSize,
     setAutoSave,
     setDarkMode,
+    setHideEditor,
+    setHidePreview,
+    setHideSidebar,
     selectDocument,
     createNewDocument,
     updateCurrentDocument,

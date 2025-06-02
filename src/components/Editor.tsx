@@ -53,19 +53,86 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
     onChange(value);
   };
   
-  // Apply editor theme and font size
-  const editorStyle: React.CSSProperties = {
-    fontSize: `${fontSize}px`,
-    fontFamily: 'monospace',
-    lineHeight: '1.5',
-    padding: '1rem',
-    resize: 'none',
-    height: '100%',
-    width: '100%',
-    border: 'none',
-    outline: 'none',
-    backgroundColor: editorTheme === 'dark' ? '#1e1e1e' : '#ffffff',
-    color: editorTheme === 'dark' ? '#d4d4d4' : '#333333',
+  // Get theme styles based on selected theme
+  const getThemeStyles = (): React.CSSProperties => {
+    const baseStyles: React.CSSProperties = {
+      fontSize: `${fontSize}px`,
+      fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
+      lineHeight: '1.5',
+      padding: '1rem',
+      resize: 'none',
+      height: '100%',
+      width: '100%',
+      border: 'none',
+      outline: 'none',
+    };
+    
+    // Theme-specific styles
+    switch (editorTheme) {
+      case 'github':
+        return {
+          ...baseStyles,
+          backgroundColor: '#ffffff',
+          color: '#24292e',
+        };
+      
+      case 'github-dark':
+        return {
+          ...baseStyles,
+          backgroundColor: '#0d1117',
+          color: '#c9d1d9',
+        };
+      
+      case 'atom-one-dark':
+        return {
+          ...baseStyles,
+          backgroundColor: '#282c34',
+          color: '#abb2bf',
+        };
+      
+      case 'atom-one-light':
+        return {
+          ...baseStyles,
+          backgroundColor: '#fafafa',
+          color: '#383a42',
+        };
+      
+      case 'space-invader':
+        return {
+          ...baseStyles,
+          backgroundColor: '#1a1a2e',
+          color: '#16e0bd',
+          caretColor: '#ff0055',
+        };
+      
+      case 'dracula':
+        return {
+          ...baseStyles,
+          backgroundColor: '#282a36',
+          color: '#f8f8f2',
+        };
+      
+      case 'monokai':
+        return {
+          ...baseStyles,
+          backgroundColor: '#272822',
+          color: '#f8f8f2',
+        };
+      
+      case 'nord':
+        return {
+          ...baseStyles,
+          backgroundColor: '#2e3440',
+          color: '#d8dee9',
+        };
+      
+      default: // default theme
+        return {
+          ...baseStyles,
+          backgroundColor: '#ffffff',
+          color: '#333333',
+        };
+    }
   };
   
   return (
@@ -74,7 +141,7 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
         ref={editorRef}
         value={value}
         onChange={handleChange}
-        style={editorStyle}
+        style={getThemeStyles()}
         placeholder="Start writing your markdown here..."
       />
       

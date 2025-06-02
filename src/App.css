@@ -119,6 +119,22 @@ body {
   border: 0;
 }
 
+/* Document hover styles */
+div:hover > .document-close-btn {
+  visibility: visible !important;
+}
+
+.document-close-btn:hover {
+  background-color: rgba(255, 0, 0, 0.1) !important;
+  color: #ff5252 !important;
+}
+
+/* Drag and drop zone */
+.drag-active {
+  border: 2px dashed #4caf50 !important;
+  background-color: rgba(76, 175, 80, 0.05) !important;
+}
+
 /* Dark mode overrides */
 .dark-mode .previewer-container pre {
   background-color: #2d2d2d;
