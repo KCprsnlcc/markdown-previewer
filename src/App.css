@@ -290,7 +290,50 @@ div:hover > .document-close-btn {
   background-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Component transitions */
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  70% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Animation classes */
 .fade-in {
   animation: fadeIn 0.3s ease-in;
 }
@@ -299,7 +342,89 @@ div:hover > .document-close-btn {
   animation: slideIn 0.3s ease-out;
 }
 
-/* Button and interactive element styles */
+.slide-in-left {
+  animation: slideInFromLeft 0.4s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInFromRight 0.4s ease-out;
+}
+
+.bounce-in {
+  animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Logo styling */
+.app-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  transition: all 0.3s ease;
+}
+
+.app-logo:hover .logo-icon {
+  transform: rotate(10deg);
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.3s ease;
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.dark-mode .logo-text {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* Component entrance animations */
+.sidebar-enter {
+  animation: slideInFromLeft 0.4s ease-out;
+}
+
+.editor-enter {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+.preview-enter {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.settings-enter {
+  animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Interactive elements with animations */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .hover-lift:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Button animations */
 .btn {
   padding: 8px 16px;
   border-radius: 6px;
@@ -311,47 +436,60 @@ div:hover > .document-close-btn {
   align-items: center;
   gap: 8px;
   font-size: 14px;
+  position: relative;
+  overflow: hidden;
 }
 
-.btn-primary {
-  background-color: #2563eb;
-  color: white;
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
 }
 
-.btn-primary:hover {
-  background-color: #1d4ed8;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.btn:active::after {
+  animation: ripple 0.6s ease-out;
 }
 
-.btn-secondary {
-  background-color: #f3f4f6;
-  color: #374151;
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20, 20);
+    opacity: 0;
+  }
 }
 
-.btn-secondary:hover {
-  background-color: #e5e7eb;
-  transform: translateY(-1px);
+/* Shimmer effect for loading states */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
-.dark-mode .btn-secondary {
-  background-color: #333;
-  color: #e0e0e0;
-}
-
-.dark-mode .btn-secondary:hover {
-  background-color: #444;
-}
-
-/* Animation keyframes */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideIn {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.dark-mode .shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(30, 30, 30, 0),
+    rgba(60, 60, 60, 0.2),
+    rgba(30, 30, 30, 0)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
 /* Layout optimization classes */

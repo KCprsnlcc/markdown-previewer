@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import Previewer from './components/Previewer';
 import SettingsPanel from './components/SettingsPanel';
+import Logo from './components/Logo';
 import { IconSettings, IconArrowUp } from '@tabler/icons-react';
 import './App.css';
 
@@ -187,13 +188,14 @@ const AppContent = memo(({
   
   return (
     <div style={containerStyle} className="optimize-gpu">
-      {!hideSidebar && <Sidebar />}
+      {!hideSidebar && <div className="sidebar-enter"><Sidebar /></div>}
       
       <div style={mainContainerStyle}>
-        <div style={toolbarStyle}>
+        <div style={toolbarStyle} className="flex items-center justify-between">
+          <Logo size="medium" />
           <button
             onClick={() => setSettingsPanelOpen(true)}
-            className="btn btn-secondary"
+            className="btn btn-secondary hover-lift"
           >
             <IconSettings size={18} />
             Settings
@@ -204,7 +206,7 @@ const AppContent = memo(({
           {currentDocument ? (
             <>
               {!hideEditor && (
-                <div style={panelStyle} className="optimize-gpu">
+                <div style={panelStyle} className="optimize-gpu editor-enter">
                   <Editor 
                     content={currentDocument.content} 
                     onChange={handleDocumentChange}
@@ -215,7 +217,7 @@ const AppContent = memo(({
               )}
               
               {!hidePreview && (
-                <div style={panelStyle} className="optimize-gpu">
+                <div style={panelStyle} className="optimize-gpu preview-enter">
                   <Previewer 
                     content={currentDocument.content}
                     onScroll={handlePreviewScroll}
@@ -225,7 +227,7 @@ const AppContent = memo(({
               )}
             </>
           ) : (
-            <div className="fade-in" style={{
+            <div className="bounce-in" style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -235,15 +237,18 @@ const AppContent = memo(({
               padding: '2rem',
               textAlign: 'center',
             }}>
-              <h2 style={{ marginBottom: '1rem' }}>Welcome to Markdown Previewer</h2>
-              <p>Create a new document or select an existing one from the sidebar to get started.</p>
+              <Logo size="large" />
+              <h2 style={{ marginBottom: '1rem', marginTop: '1.5rem' }} className="slide-in">Welcome to MarkDown</h2>
+              <p className="slide-in" style={{ animationDelay: '0.1s' }}>Create a new document or select an existing one from the sidebar to get started.</p>
             </div>
           )}
         </div>
       </div>
       
       {settingsPanelOpen && (
-        <SettingsPanel isOpen={settingsPanelOpen} onClose={() => setSettingsPanelOpen(false)} />
+        <div className="settings-enter">
+          <SettingsPanel isOpen={settingsPanelOpen} onClose={() => setSettingsPanelOpen(false)} />
+        </div>
       )}
       
       {showScrollToTop && (
