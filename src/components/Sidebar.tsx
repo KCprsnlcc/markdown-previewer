@@ -261,8 +261,8 @@ const Sidebar: React.FC = () => {
   });
   
   const buttonStyle: React.CSSProperties = {
-    backgroundColor: darkMode ? 'var(--bg-dark)' : 'var(--bg-light)',
-    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
+    backgroundColor: 'var(--primary-color)',
+    color: '#fff',
     border: 'none',
     borderRadius: '8px',
     padding: '0.5rem',

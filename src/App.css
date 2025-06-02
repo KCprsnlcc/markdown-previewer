@@ -16,9 +16,8 @@
   --bg-dark: #111827;
   --bg-light-hover: #f1f5f9;
   --bg-dark-hover: #1e293b;
-  --bg-light-selected: #dbeafe;
-  --bg-dark-selected: #1e40af;
-  
+  --bg-light-selected: var(--primary-color);
+  --bg-dark-selected: var(--primary-color);
   /* Form input backgrounds */
   --input-bg-light: #ffffff;
   --input-bg-dark: #1f2937;

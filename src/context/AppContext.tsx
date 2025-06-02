@@ -44,7 +44,7 @@ const defaultContext: AppContextType = {
   previewTheme: 'default',
   fontSize: 14,
   autoSave: true,
-  darkMode: true,
+  darkMode: false,
   hideEditor: false,
   hidePreview: false,
   hideSidebar: false,
@@ -86,7 +86,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [previewTheme, setPreviewTheme] = useState<string>('default');
   const [fontSize, setFontSize] = useState<number>(14);
   const [autoSave, setAutoSave] = useState<boolean>(true);
-  const [darkMode, setDarkMode] = useState<boolean>(true);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
   const [hideEditor, setHideEditor] = useState<boolean>(false);
   const [hidePreview, setHidePreview] = useState<boolean>(false);
   const [hideSidebar, setHideSidebar] = useState<boolean>(false);
