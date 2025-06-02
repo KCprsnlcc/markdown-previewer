@@ -1,25 +1,59 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { AppProvider } from './context/AppContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import Previewer from './components/Previewer';
 import SettingsPanel from './components/SettingsPanel';
 import Logo from './components/Logo';
-import { IconSettings, IconArrowUp } from '@tabler/icons-react';
+import Auth from './components/Auth';
+import { IconSettings, IconArrowUp, IconLogout } from '@tabler/icons-react';
 import './App.css';
 
 const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppProvider>
+        <div className="App">
+          <AuthContent />
+        </div>
+      </AppProvider>
+    </AuthProvider>
+  );
+};
+
+const AuthContent: React.FC = () => {
+  const { user, isLoading } = useAuth();
   const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
   
-  return (
-    <AppProvider>
-      <div className="App">
-        <AppContent 
-          settingsPanelOpen={settingsPanelOpen}
-          setSettingsPanelOpen={setSettingsPanelOpen}
-        />
+  if (isLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        backgroundColor: 'var(--bg-light)'
+      }}>
+        <div style={{ 
+          fontSize: '1.25rem', 
+          color: 'var(--text-light)' 
+        }}>
+          Loading...
+        </div>
       </div>
-    </AppProvider>
+    );
+  }
+  
+  if (!user) {
+    return <Auth />;
+  }
+  
+  return (
+    <AppContent 
+      settingsPanelOpen={settingsPanelOpen}
+      setSettingsPanelOpen={setSettingsPanelOpen}
+    />
   );
 };
 
@@ -41,6 +75,8 @@ const AppContent = memo(({
     hidePreview,
     hideSidebar
   } = require('./context/AppContext').useAppContext();
+  
+  const { signOut } = useAuth();
   
   // States for scroll synchronization
   const [editorScrollPosition, setEditorScrollPosition] = useState<number | undefined>(undefined);
@@ -68,7 +104,7 @@ const AppContent = memo(({
   
   const toolbarStyle = React.useMemo<React.CSSProperties>(() => ({
     display: 'flex',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     padding: '0.5rem 1rem',
     borderBottom: '1px solid #e0e0e0',
     backgroundColor: darkMode ? '#1a1a1a' : '#fff',
@@ -193,13 +229,42 @@ const AppContent = memo(({
       <div style={mainContainerStyle}>
         <div style={toolbarStyle} className="flex items-center justify-between">
           <Logo size="medium" />
-          <button
-            onClick={() => setSettingsPanelOpen(true)}
-            className="btn btn-secondary hover-lift"
-          >
-            <IconSettings size={18} />
-            Settings
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              onClick={() => signOut()}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                backgroundColor: 'transparent',
+                border: '1px solid var(--border-color)',
+                color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
+                cursor: 'pointer'
+              }}
+            >
+              <IconLogout size={18} />
+              Sign Out
+            </button>
+            <button
+              onClick={() => setSettingsPanelOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                backgroundColor: 'var(--primary-color)',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <IconSettings size={18} />
+              Settings
+            </button>
+          </div>
         </div>
         
         <div style={contentContainerStyle}>
