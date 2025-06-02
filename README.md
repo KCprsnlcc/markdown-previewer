@@ -1,46 +1,108 @@
-# Getting Started with Create React App
+# Markdown Previewer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A powerful, feature-rich markdown editor and previewer built with React, TypeScript, and Supabase.
+
+![Markdown Previewer Screenshot](./public/image.png)
+
+## Features
+
+- **Live Markdown Preview**: See your markdown rendered in real-time as you type
+- **Document Management**: Create, read, update, and delete markdown documents
+- **Cloud Sync**: Syncs your documents across devices using Supabase
+- **File Operations**: 
+  - Upload markdown files via drag-and-drop
+  - Support for .md, .txt, and text/plain files
+  - Rename documents with inline editing
+- **UI Customization**:
+  - Toggle visibility of editor, preview pane, and sidebar
+  - Dark mode support
+  - Responsive design for all screen sizes
+- **Organization**:
+  - Tag-based document organization
+  - Powerful search functionality
+- **Security**:
+  - User authentication via Supabase
+  - Enhanced error handling and debugging for auth issues
+
+## Tech Stack
+
+- **Frontend**: React, TypeScript, CSS
+- **Backend/Database**: Supabase
+- **Markdown Parsing**: [React Markdown](https://github.com/remarkjs/react-markdown)
+- **Build Tool**: Create React App
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14+)
+- npm or yarn
+- Supabase account for backend functionality
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/KCprsnlcc/markdown-previewer.git
+   cd markdown-previewer
+   ```
+
+2. Install dependencies
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. Create a `.env` file in the root directory with your Supabase credentials:
+   ```
+   REACT_APP_SUPABASE_URL=your_supabase_url
+   REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. Start the development server
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) to view the app in your browser
 
 ## Available Scripts
 
-In the project directory, you can run:
+- `npm start` - Runs the app in development mode
+- `npm test` - Launches the test runner
+- `npm run build` - Builds the app for production
+- `npm run eject` - Ejects from Create React App configuration
 
-### `npm start`
+## Project Structure
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
+markdown-previewer/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── Auth.tsx           # Authentication component
+│   │   ├── Editor.tsx         # Markdown editing component
+│   │   ├── Previewer.tsx      # Markdown rendering component
+│   │   ├── SettingsPanel.tsx  # Settings management
+│   │   └── Sidebar.tsx        # Document navigation
+│   ├── context/
+│   │   └── AppContext.tsx     # State management
+│   ├── services/
+│   │   └── supabase.ts        # Database integration
+│   ├── App.css
+│   ├── App.tsx                # Main component
+│   └── index.tsx
+└── package.json
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Contributing
 
-### `npm test`
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
