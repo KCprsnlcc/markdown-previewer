@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { IconSearch, IconPlus, IconTag, IconX, IconUpload, IconEdit } from '@tabler/icons-react';
 import { MarkdownDocument } from '../supabase';
+import { showSuccess, showError, showInfo } from '../utils/toast';
 
 const Sidebar: React.FC = () => {
   const {
@@ -118,20 +119,27 @@ const Sidebar: React.FC = () => {
           };
           
           await saveNewDocument(newDocument as MarkdownDocument);
+          showSuccess(`Imported "${file.name}" successfully`);
         } catch (error) {
           console.error('Error processing file:', error);
-          alert(`Failed to process file: ${file.name}`);
+          showError(`Failed to process file: ${file.name}`);
         }
       } else {
-        alert(`File type not supported: ${file.name}. Please upload .md files only.`);
+        showError(`File type not supported: ${file.name}. Please upload .md files only.`);
       }
     }
   };
 
   const saveNewDocument = async (doc: MarkdownDocument) => {
-    selectDocument(doc);
-    await updateCurrentDocument(doc.content, doc.title, doc.tags);
-    await refreshDocuments();
+    try {
+      selectDocument(doc);
+      await updateCurrentDocument(doc.content, doc.title, doc.tags);
+      await refreshDocuments();
+    } catch (error) {
+      console.error('Error saving new document:', error);
+      showError('Failed to save the imported document. Please try again.');
+      throw error; // Re-throw to be caught by the caller
+    }
   };
 
   const readFileContent = (file: File): Promise<string> => {
@@ -141,11 +149,15 @@ const Sidebar: React.FC = () => {
         if (e.target && typeof e.target.result === 'string') {
           resolve(e.target.result);
         } else {
-          reject(new Error('Failed to read file'));
+          const error = new Error('Failed to read file content');
+          console.error(error);
+          reject(error);
         }
       };
-      reader.onerror = () => {
-        reject(new Error('File read error'));
+      reader.onerror = (event) => {
+        const error = new Error('File read error: ' + (event.target?.error?.message || 'unknown error'));
+        console.error(error);
+        reject(error);
       };
       reader.readAsText(file);
     });
@@ -163,23 +175,31 @@ const Sidebar: React.FC = () => {
     e.preventDefault();
     
     if (renameValue.trim() === '') {
-      return; // Don't save empty titles
+      showError('Document title cannot be empty');
+      return;
     }
     
-    const docToRename = documents.find(doc => doc.id === docId);
-    if (docToRename) {
-      // If it's the current document, update directly
-      if (currentDocument?.id === docId) {
-        await updateCurrentDocument(currentDocument.content, renameValue, currentDocument.tags);
-      } else {
-        // Otherwise, select it first, then update
-        selectDocument(docToRename);
-        await updateCurrentDocument(docToRename.content, renameValue, docToRename.tags);
+    try {
+      const docToRename = documents.find(doc => doc.id === docId);
+      if (docToRename) {
+        const oldTitle = docToRename.title;
+        // If it's the current document, update directly
+        if (currentDocument?.id === docId) {
+          await updateCurrentDocument(currentDocument.content, renameValue, currentDocument.tags);
+        } else {
+          // Otherwise, select it first, then update
+          selectDocument(docToRename);
+          await updateCurrentDocument(docToRename.content, renameValue, docToRename.tags);
+        }
+        showSuccess(`Renamed "${oldTitle}" to "${renameValue}"`);
       }
+      
+      setRenamingDocId(null);
+      await refreshDocuments();
+    } catch (error) {
+      console.error('Error renaming document:', error);
+      showError('Failed to rename document. Please try again.');
     }
-    
-    setRenamingDocId(null);
-    await refreshDocuments();
   };
   
   const cancelRenaming = () => {

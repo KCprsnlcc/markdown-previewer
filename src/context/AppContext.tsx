@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { MarkdownDocument, getDocuments, saveDocument, deleteDocument } from '../supabase';
+import { showSuccess, showError, showInfo } from '../utils/toast';
 
 interface AppContextType {
   documents: MarkdownDocument[];
@@ -104,6 +105,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
       } catch (error) {
         console.error('Error loading documents:', error);
+        showError('Failed to load documents. Please try again later.');
       } finally {
         setIsLoading(false);
       }
@@ -119,6 +121,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       setDocuments(docs);
     } catch (error) {
       console.error('Error refreshing documents:', error);
+      showError('Failed to refresh documents. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -129,47 +132,74 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
   
   const createNewDocument = () => {
-    const newDocument: Partial<MarkdownDocument> = {
-      id: crypto.randomUUID(),
-      title: 'Untitled Document',
-      content: '# Untitled Document\n\nStart writing your markdown here...',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      tags: [],
-      user_id: 'anonymous', // Replace with actual user ID if authentication is implemented
-    };
-    
-    setCurrentDocument(newDocument as MarkdownDocument);
-    saveDocument(newDocument);
-    refreshDocuments();
+    try {
+      const newDocument: Partial<MarkdownDocument> = {
+        id: crypto.randomUUID(),
+        title: 'Untitled Document',
+        content: '# Untitled Document\n\nStart writing your markdown here...',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        tags: [],
+        user_id: 'anonymous', // Replace with actual user ID if authentication is implemented
+      };
+      
+      setCurrentDocument(newDocument as MarkdownDocument);
+      saveDocument(newDocument);
+      refreshDocuments();
+      showSuccess('New document created');
+    } catch (error) {
+      console.error('Error creating new document:', error);
+      showError('Failed to create new document. Please try again.');
+    }
   };
   
   const updateCurrentDocument = async (content: string, title?: string, tags?: string[]) => {
     if (!currentDocument) return;
     
-    const updatedDocument: Partial<MarkdownDocument> = {
-      ...currentDocument,
-      content,
-      updated_at: new Date().toISOString(),
-    };
-    
-    if (title) updatedDocument.title = title;
-    if (tags) updatedDocument.tags = tags;
-    
-    const saved = await saveDocument(updatedDocument);
-    if (saved) {
-      setCurrentDocument(saved);
-      await refreshDocuments();
+    try {
+      const updatedDocument: Partial<MarkdownDocument> = {
+        ...currentDocument,
+        content,
+        updated_at: new Date().toISOString(),
+      };
+      
+      if (title) updatedDocument.title = title;
+      if (tags) updatedDocument.tags = tags;
+      
+      const saved = await saveDocument(updatedDocument);
+      if (saved) {
+        setCurrentDocument(saved);
+        await refreshDocuments();
+        if (title) {
+          showSuccess(`Document "${title}" saved successfully`);
+        } else {
+          // Only show save notification when title changes to avoid too many notifications during autosave
+        }
+      } else {
+        showError('Failed to save document');
+      }
+    } catch (error) {
+      console.error('Error updating document:', error);
+      showError('Failed to update document. Please try again.');
     }
   };
   
   const deleteCurrentDocument = async () => {
     if (!currentDocument) return;
     
-    const success = await deleteDocument(currentDocument.id);
-    if (success) {
-      await refreshDocuments();
-      setCurrentDocument(documents.length > 0 ? documents[0] : null);
+    try {
+      const documentTitle = currentDocument.title;
+      const success = await deleteDocument(currentDocument.id);
+      if (success) {
+        await refreshDocuments();
+        setCurrentDocument(documents.length > 0 ? documents[0] : null);
+        showSuccess(`Document "${documentTitle}" deleted successfully`);
+      } else {
+        showError('Failed to delete document');
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      showError('Failed to delete document. Please try again.');
     }
   };
   

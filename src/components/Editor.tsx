@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { IconDeviceFloppy } from '@tabler/icons-react';
+import { showSuccess, showError } from '../utils/toast';
 
 interface EditorProps {
   content: string;
@@ -103,7 +104,13 @@ const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorPr
   
   // Memoized save handler
   const handleSave = useCallback(() => {
-    onChange(value);
+    try {
+      onChange(value);
+      showSuccess('Document saved successfully');
+    } catch (error) {
+      console.error('Error saving document:', error);
+      showError('Failed to save document. Please try again.');
+    }
   }, [onChange, value]);
   
   // Get theme styles based on selected theme - memoized for performance

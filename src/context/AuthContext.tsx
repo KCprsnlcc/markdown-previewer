@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../supabase';
+import { showSuccess, showError, showInfo } from '../utils/toast';
 
 interface AuthContextType {
   user: User | null;
@@ -58,6 +59,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUp = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      // Add throttling for sign up as well to prevent rate limiting
+      const lastSignupTime = localStorage.getItem('lastSignupAttempt');
+      const now = Date.now();
+      const timeSinceLastAttempt = lastSignupTime ? now - parseInt(lastSignupTime) : Infinity;
+      
+      if (timeSinceLastAttempt < 3000) {
+        await new Promise(resolve => setTimeout(resolve, 3000 - timeSinceLastAttempt));
+      }
+      
+      localStorage.setItem('lastSignupAttempt', now.toString());
+      
       const response = await supabase.auth.signUp({
         email,
         password,
@@ -70,9 +82,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       });
       
+      if (response.error) {
+        // Let the Auth component handle the toast notification
+        console.error('Signup error:', response.error.message);
+      } else {
+        console.log('Signup successful');
+      }
+      
       setIsLoading(false);
       return response;
     } catch (error) {
+      console.error('Unexpected signup error:', error);
       setIsLoading(false);
       return { error, data: null };
     }
@@ -102,15 +122,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // If successful, clear any temporary rate limit markers
       if (!response.error) {
         localStorage.removeItem('authRateLimited');
-      } else if (response.error.message?.includes('rate limit')) {
-        // Mark that we've been rate limited
-        localStorage.setItem('authRateLimited', 'true');
-        localStorage.setItem('rateLimitTime', now.toString());
+        console.log('Authentication successful');
+      } else {
+        // Better error logging based on error type - let Auth component handle the toast
+        if (response.error.message?.includes('rate limit')) {
+          console.error('Rate limit exceeded:', response.error.message);
+          localStorage.setItem('authRateLimited', 'true');
+          localStorage.setItem('rateLimitTime', now.toString());
+        } else if (response.error.status === 400) {
+          console.error('Authentication error (400):', response.error.message);
+        } else if (response.error.status === 429) {
+          console.error('Too many requests (429):', response.error.message);
+        } else {
+          console.error('Authentication error:', response.error);
+        }
       }
       
       setIsLoading(false);
       return response;
     } catch (error) {
+      console.error('Unexpected authentication error:', error);
       setIsLoading(false);
       return { error, data: null };
     }
@@ -118,17 +149,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = async () => {
     setIsLoading(true);
-    await supabase.auth.signOut();
-    setIsLoading(false);
+    try {
+      await supabase.auth.signOut();
+      showSuccess('You have been signed out successfully');
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Sign out error:', error);
+      showError('Error signing out. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   const resetPassword = async (email: string) => {
     setIsLoading(true);
-    const response = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setIsLoading(false);
-    return response;
+    try {
+      const response = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (response.error) {
+        console.error('Password reset error:', response.error.message);
+        // Let the Auth component handle the toast notification
+      } else {
+        console.log('Password reset email sent successfully');
+      }
+      
+      setIsLoading(false);
+      return response;
+    } catch (error) {
+      console.error('Unexpected password reset error:', error);
+      setIsLoading(false);
+      return { error, data: null };
+    }
   };
 
   const value: AuthContextType = {

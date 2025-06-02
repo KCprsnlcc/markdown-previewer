@@ -8,6 +8,8 @@ import SettingsPanel from './components/SettingsPanel';
 import Logo from './components/Logo';
 import Auth from './components/Auth';
 import { IconSettings, IconArrowUp, IconLogout } from '@tabler/icons-react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 const App: React.FC = () => {
@@ -16,6 +18,7 @@ const App: React.FC = () => {
       <AppProvider>
         <div className="App">
           <AuthContent />
+          <ToastContainer theme="colored" />
         </div>
       </AppProvider>
     </AuthProvider>

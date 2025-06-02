@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { IconSettings, IconX } from '@tabler/icons-react';
+import { showSuccess, showInfo } from '../utils/toast';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -150,7 +151,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
               <input
                 type="checkbox"
                 checked={darkMode}
-                onChange={(e) => setDarkMode(e.target.checked)}
+                onChange={(e) => {
+                  setDarkMode(e.target.checked);
+                  showInfo(`Dark mode ${e.target.checked ? 'enabled' : 'disabled'}`);
+                }}
                 style={switchInputStyle}
               />
               <span style={sliderStyle(darkMode)}>
@@ -165,7 +169,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
             </label>
             <select
               value={editorTheme}
-              onChange={(e) => setEditorTheme(e.target.value)}
+              onChange={(e) => {
+                setEditorTheme(e.target.value);
+                showSuccess(`Editor theme changed to ${e.target.value}`);
+              }}
               style={selectStyle}
             >
               <option value="default">Default</option>
@@ -186,7 +193,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
             </label>
             <select
               value={previewTheme}
-              onChange={(e) => setPreviewTheme(e.target.value)}
+              onChange={(e) => {
+                setPreviewTheme(e.target.value);
+                showSuccess(`Preview theme changed to ${e.target.value}`);
+              }}
               style={selectStyle}
             >
               <option value="default">Default</option>
@@ -211,7 +221,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
               <input
                 type="checkbox"
                 checked={hideEditor}
-                onChange={(e) => setHideEditor(e.target.checked)}
+                onChange={(e) => {
+                  setHideEditor(e.target.checked);
+                  showInfo(`Editor ${e.target.checked ? 'hidden' : 'visible'}`);
+                }}
                 style={switchInputStyle}
               />
               <span style={sliderStyle(hideEditor)}>
@@ -226,7 +239,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
               <input
                 type="checkbox"
                 checked={hidePreview}
-                onChange={(e) => setHidePreview(e.target.checked)}
+                onChange={(e) => {
+                  setHidePreview(e.target.checked);
+                  showInfo(`Preview ${e.target.checked ? 'hidden' : 'visible'}`);
+                }}
                 style={switchInputStyle}
               />
               <span style={sliderStyle(hidePreview)}>
@@ -241,7 +257,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
               <input
                 type="checkbox"
                 checked={hideSidebar}
-                onChange={(e) => setHideSidebar(e.target.checked)}
+                onChange={(e) => {
+                  setHideSidebar(e.target.checked);
+                  showInfo(`Sidebar ${e.target.checked ? 'hidden' : 'visible'}`);
+                }}
                 style={switchInputStyle}
               />
               <span style={sliderStyle(hideSidebar)}>
@@ -263,7 +282,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
               min="12"
               max="24"
               value={fontSize}
-              onChange={(e) => setFontSize(Number(e.target.value))}
+              onChange={(e) => {
+                setFontSize(Number(e.target.value));
+                showInfo(`Font size set to ${e.target.value}px`);
+              }}
               style={{ width: '100%' }}
             />
           </div>
@@ -274,7 +296,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
               <input
                 type="checkbox"
                 checked={autoSave}
-                onChange={(e) => setAutoSave(e.target.checked)}
+                onChange={(e) => {
+                  setAutoSave(e.target.checked);
+                  showInfo(`Auto-save ${e.target.checked ? 'enabled' : 'disabled'}`);
+                }}
                 style={switchInputStyle}
               />
               <span style={sliderStyle(autoSave)}>
