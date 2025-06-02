@@ -36,10 +36,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
     transform: 'translate(-50%, -50%)',
     width: '500px',
     maxWidth: '90%',
-    backgroundColor: darkMode ? '#333' : '#fff',
-    color: darkMode ? '#fff' : '#333',
+    backgroundColor: darkMode ? 'var(--bg-dark)' : 'var(--bg-light)',
+    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
     borderRadius: '8px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+    boxShadow: 'var(--shadow-lg)',
     zIndex: 1000,
     padding: '1.5rem',
   };
@@ -59,7 +59,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '1.5rem',
-    borderBottom: darkMode ? '1px solid #555' : '1px solid #eee',
+    borderBottom: darkMode ? `1px solid var(--border-color-dark)` : `1px solid var(--border-color)`,
     paddingBottom: '1rem',
   };
   
@@ -71,16 +71,16 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
     backgroundColor: 'transparent',
     border: 'none',
     cursor: 'pointer',
-    color: darkMode ? '#aaa' : '#666',
+    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
   };
   
   const selectStyle: React.CSSProperties = {
     width: '100%',
     padding: '0.5rem',
-    borderRadius: '4px',
-    border: darkMode ? '1px solid #555' : '1px solid #ccc',
-    backgroundColor: darkMode ? '#444' : '#fff',
-    color: darkMode ? '#fff' : '#333',
+    borderRadius: '8px',
+    border: darkMode ? `1px solid var(--border-color-dark)` : `1px solid var(--border-color)`,
+    backgroundColor: darkMode ? 'var(--input-bg-dark)' : 'var(--input-bg-light)',
+    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
   };
   
   const switchContainerStyle: React.CSSProperties = {
@@ -114,7 +114,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: checked ? '#4caf50' : darkMode ? '#555' : '#ccc',
+    backgroundColor: checked ? 'var(--primary-color)' : darkMode ? 'var(--border-color-dark)' : 'var(--border-color)',
     borderRadius: '22px',
     transition: '0.4s',
   });
@@ -289,7 +289,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: '#4caf50',
+              backgroundColor: 'var(--primary-color)',
               color: 'white',
               border: 'none',
               borderRadius: '4px',

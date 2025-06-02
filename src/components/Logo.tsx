@@ -23,6 +23,9 @@ const Logo: React.FC<LogoProps> = ({ showText = true, size = 'medium' }) => {
     large: 22
   };
   
+  // Brand colors from CSS variables
+  const primaryColor = darkMode ? 'var(--primary-light)' : 'var(--primary-color)';
+  
   return (
     <div className={`app-logo ${size}`}>
       <div className="logo-icon">
@@ -33,9 +36,11 @@ const Logo: React.FC<LogoProps> = ({ showText = true, size = 'medium' }) => {
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path 
-            d="M3 4.5C3 3.67157 3.67157 3 4.5 3H19.5C20.3284 3 21 3.67157 21 4.5V19.5C21 20.3284 20.3284 21 19.5 21H4.5C3.67157 21 3 20.3284 3 19.5V4.5Z" 
-            fill={darkMode ? "#3b82f6" : "#2563eb"} 
+          <rect 
+            width="24" 
+            height="24" 
+            rx="4" 
+            fill={primaryColor} 
           />
           <path 
             d="M7 7.5L12 12.5L17 7.5" 

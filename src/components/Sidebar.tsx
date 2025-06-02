@@ -189,16 +189,16 @@ const Sidebar: React.FC = () => {
   const sidebarStyle: React.CSSProperties = {
     width: '250px',
     height: '100%',
-    borderRight: '1px solid #e0e0e0',
+    borderRight: '1px solid var(--border-color)',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: darkMode ? '#1a1a1a' : '#f5f5f5',
-    color: darkMode ? '#e0e0e0' : '#333',
+    backgroundColor: darkMode ? 'var(--bg-dark)' : 'var(--bg-light)',
+    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
   };
   
   const headerStyle: React.CSSProperties = {
     padding: '1rem',
-    borderBottom: '1px solid #e0e0e0',
+    borderBottom: '1px solid var(--border-color)',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -206,34 +206,34 @@ const Sidebar: React.FC = () => {
   
   const searchContainerStyle: React.CSSProperties = {
     padding: '1rem',
-    borderBottom: '1px solid #e0e0e0',
+    borderBottom: '1px solid var(--border-color)',
   };
   
   const searchInputStyle: React.CSSProperties = {
     width: '100%',
     padding: '0.5rem',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    backgroundColor: darkMode ? '#333' : '#fff',
-    color: darkMode ? '#fff' : '#333',
+    border: '1px solid var(--border-color)',
+    borderRadius: '8px',
+    backgroundColor: darkMode ? 'var(--input-bg-dark)' : 'var(--input-bg-light)',
+    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
   };
   
   const tagsContainerStyle: React.CSSProperties = {
     padding: '1rem',
-    borderBottom: '1px solid #e0e0e0',
+    borderBottom: '1px solid var(--border-color)',
   };
   
   const tagStyle = (isSelected: boolean): React.CSSProperties => ({
     display: 'inline-block',
     margin: '0.25rem',
     padding: '0.25rem 0.5rem',
-    borderRadius: '4px',
+    borderRadius: '8px',
     backgroundColor: isSelected 
-      ? (darkMode ? '#4caf50' : '#81c784') 
-      : (darkMode ? '#333' : '#e0e0e0'),
+      ? (darkMode ? 'var(--primary-color)' : 'var(--primary-light)') 
+      : (darkMode ? 'var(--tag-bg-dark)' : 'var(--tag-bg-light)'),
     color: isSelected 
       ? '#fff' 
-      : (darkMode ? '#e0e0e0' : '#333'),
+      : (darkMode ? 'var(--text-dark)' : 'var(--text-light)'),
     cursor: 'pointer',
     fontSize: '0.875rem',
   });
@@ -247,24 +247,24 @@ const Sidebar: React.FC = () => {
   const documentItemStyle = (isSelected: boolean): React.CSSProperties => ({
     padding: '0.75rem 1rem',
     margin: '0.25rem 0',
-    borderRadius: '4px',
+    borderRadius: '8px',
     cursor: 'pointer',
     backgroundColor: isSelected 
-      ? (darkMode ? '#2c5282' : '#90caf9') 
+      ? (darkMode ? 'var(--bg-dark-selected)' : 'var(--bg-light-selected)') 
       : 'transparent',
     color: isSelected 
       ? '#fff' 
-      : (darkMode ? '#e0e0e0' : '#333'),
+      : (darkMode ? 'var(--text-dark)' : 'var(--text-light)'),
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   });
   
   const buttonStyle: React.CSSProperties = {
-    backgroundColor: darkMode ? '#333' : '#e0e0e0',
-    color: darkMode ? '#fff' : '#333',
+    backgroundColor: darkMode ? 'var(--bg-dark)' : 'var(--bg-light)',
+    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '8px',
     padding: '0.5rem',
     cursor: 'pointer',
     display: 'flex',
@@ -275,13 +275,13 @@ const Sidebar: React.FC = () => {
   const iconButtonStyle: React.CSSProperties = {
     background: 'none',
     border: 'none',
-    color: darkMode ? '#aaa' : '#666',
+    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
     cursor: 'pointer',
     padding: '2px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '4px',
+    borderRadius: '8px',
   };
   
   return (
@@ -289,8 +289,8 @@ const Sidebar: React.FC = () => {
       style={{
         ...sidebarStyle,
         ...(isDragging && {
-          backgroundColor: darkMode ? '#2a2a2a' : '#e9f0f7',
-          borderColor: '#4caf50',
+          backgroundColor: darkMode ? 'var(--bg-dark-hover)' : 'var(--bg-light-hover)',
+          borderColor: 'var(--primary-color)',
         })
       }}
       onDragOver={handleDragOver}
@@ -345,7 +345,7 @@ const Sidebar: React.FC = () => {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: darkMode ? '#aaa' : '#666',
+                color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
               }}
             >
               <IconSearch size={18} />
@@ -392,7 +392,7 @@ const Sidebar: React.FC = () => {
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  color: darkMode ? '#aaa' : '#666',
+                  color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
                   marginLeft: '0.5rem',
                 }}
               >
