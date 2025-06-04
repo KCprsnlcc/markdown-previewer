@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import { useAppContext } from '../context/AppContext';
-import { IconEye, IconDownload, IconSearch, IconX } from '@tabler/icons-react';
+import { IconDownload, IconSearch, IconX } from '@tabler/icons-react';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism.css';
 import 'prismjs/themes/prism-tomorrow.css';
@@ -48,14 +48,11 @@ interface PreviewerProps {
 const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps) => {
   const {
     fontSize,
-    previewTheme,
-    darkMode,
   } = useAppContext();
   
   const [showSearch, setShowSearch] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<{ count: number, currentIndex: number }>({ count: 0, currentIndex: -1 });
-  const [markedContent, setMarkedContent] = useState(content);
 
   const previewerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -74,7 +71,6 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
   useEffect(() => {
     if (contentRef.current !== content) {
       contentRef.current = content;
-      setMarkedContent(content);
       
       // Use requestIdleCallback for better performance (or setTimeout as fallback)
       const highlightCode = () => {
@@ -100,8 +96,9 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
     // Use a short delay to ensure the DOM is fully rendered
     const timer = setTimeout(() => {
       try {
-        // Focus on the preview container to ensure window.find only searches within it
-        previewerRef.current?.focus();
+        // Don't focus the preview container when updating search results
+        // This was causing the search input to lose focus
+        // previewerRef.current?.focus();
         
         // Count word occurrences in plain text (case insensitive)
         const plainText = previewerRef.current?.textContent || '';
@@ -179,7 +176,7 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
   const scrollToNextMatch = () => {
     if (!searchText || searchResults.count === 0 || !previewerRef.current) return;
     
-    // Focus the preview container to ensure search is constrained
+    // Focus the preview container when user navigates results
     previewerRef.current.focus();
     
     // Calculate new index
@@ -197,7 +194,7 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
   const scrollToPrevMatch = () => {
     if (!searchText || searchResults.count === 0 || !previewerRef.current) return;
     
-    // Focus the preview container to ensure search is constrained
+    // Focus the preview container when user navigates results
     previewerRef.current.focus();
     
     // Calculate new index

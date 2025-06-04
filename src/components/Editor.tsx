@@ -14,7 +14,6 @@ interface EditorProps {
 const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorProps) => {
   const {
     fontSize,
-    editorTheme,
     autoSave,
   } = useAppContext();
   
@@ -62,11 +61,10 @@ const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorPr
       currentIndex: count > 0 ? 0 : -1
     });
     
-    // If we have matches, focus the editor but don't highlight yet
-    // This lets the user control when to navigate/highlight
-    if (count > 0) {
-      editorRef.current.focus();
-    }
+    // Remove the automatic editor focus
+    // if (count > 0) {
+    //   editorRef.current.focus();
+    // }
   }, [searchText, value, showSearch]);
   
   // Helper function to escape special characters in regex
