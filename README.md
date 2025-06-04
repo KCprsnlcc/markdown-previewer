@@ -24,32 +24,32 @@ A powerful, feature-rich markdown editor and previewer built with React, TypeScr
   - User authentication via Supabase
   - Enhanced error handling and debugging for auth issues
 - **Modern Interface**:
-  - Clean, intuitive UI powered by Mantine components
-  - Toasts for user feedback using react-toastify
+  - Clean, intuitive UI powered by Mantine 8.0 components
+  - Toasts for user feedback using react-toastify 11.0
   - Icon support with Tabler icons
 
 ## Tech Stack
 
 - **Frontend**: 
-  - React 19
-  - TypeScript
+  - React 19.1.0
+  - TypeScript 4.9.5
   - CSS
-  - Mantine UI Framework
-- **Backend/Database**: Supabase
+  - Mantine UI Framework 8.0.2
+- **Backend/Database**: Supabase 2.49.9
 - **Markdown Parsing**: 
-  - React Markdown 10
-  - Remark GFM (for GitHub Flavored Markdown)
+  - React Markdown 10.1.0
+  - Remark GFM 4.0.1 (for GitHub Flavored Markdown)
   - Rehype plugins for HTML handling
-- **Syntax Highlighting**: Prism.js
-- **Notifications**: React Toastify
-- **Analytics**: Vercel Analytics
+- **Syntax Highlighting**: Prism.js 1.30.0
+- **Notifications**: React Toastify 11.0.5
+- **Analytics**: Vercel Analytics 1.5.0
 - **Build Tool**: Create React App
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14+)
+- Node.js (v18+ recommended)
 - npm or yarn
 - Supabase account for backend functionality
 
