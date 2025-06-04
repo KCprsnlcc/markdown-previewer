@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import { useAppContext } from '../context/AppContext';
+import { IconEye, IconDownload } from '@tabler/icons-react';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism.css';
 import 'prismjs/themes/prism-tomorrow.css';
@@ -105,153 +106,99 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
     }
   }, [scrollToPosition]);
   
-  // Memoized preview theme styles
-  const previewThemeStyles = useMemo((): React.CSSProperties => {
-    const baseStyles: React.CSSProperties = {
-      fontSize: `${fontSize}px`,
-      lineHeight: '1.6',
-      padding: '1rem',
-      height: '100%',
-      overflow: 'auto',
-      transition: 'background-color 0.3s ease, color 0.3s ease',
-    };
-    
-    // Apply theme-specific styles
-    switch (previewTheme) {
-      case 'github':
-        return {
-          ...baseStyles,
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-          color: darkMode ? '#c9d1d9' : '#24292e',
-          backgroundColor: darkMode ? '#0d1117' : '#ffffff',
-        };
-        
-      case 'github-dark':
-        return {
-          ...baseStyles,
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-          color: '#c9d1d9',
-          backgroundColor: '#0d1117',
-        };
+  // Export markdown as HTML
+  const exportAsHTML = () => {
+    try {
+      // Create a blob with the HTML content
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Markdown Export</title>
+          <style>
+            body {
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+              line-height: 1.6;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 2rem;
+              color: #333;
+            }
+            pre {
+              background: #f5f5f5;
+              padding: 1rem;
+              border-radius: 4px;
+              overflow: auto;
+            }
+            code {
+              font-family: monospace;
+              background: #f5f5f5;
+              padding: 0.2em 0.4em;
+              border-radius: 3px;
+            }
+            blockquote {
+              border-left: 4px solid #ddd;
+              padding-left: 1rem;
+              margin-left: 0;
+              color: #666;
+            }
+          </style>
+        </head>
+        <body>
+          ${previewerRef.current?.innerHTML || ''}
+        </body>
+        </html>
+      `;
       
-      case 'atom-one-dark':
-        return {
-          ...baseStyles,
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          color: '#abb2bf',
-          backgroundColor: '#282c34',
-        };
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
       
-      case 'atom-one-light':
-        return {
-          ...baseStyles,
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          color: '#383a42',
-          backgroundColor: '#fafafa',
-        };
+      // Create a download link and click it
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'markdown_export.html';
+      a.click();
       
-      case 'space-invader':
-        return {
-          ...baseStyles,
-          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-          color: '#16e0bd',
-          backgroundColor: '#1a1a2e',
-          border: '1px solid #16e0bd',
-          borderRadius: '4px',
-        };
-      
-      case 'documentation':
-        return {
-          ...baseStyles,
-          fontFamily: 'Georgia, serif',
-          color: darkMode ? '#e6e6e6' : '#333333',
-          backgroundColor: darkMode ? '#1a1a1a' : '#f9f9f9',
-          maxWidth: '800px',
-          margin: '0 auto',
-        };
-      
-      case 'minimal':
-        return {
-          ...baseStyles,
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          color: darkMode ? '#cccccc' : '#333333',
-          backgroundColor: darkMode ? '#222222' : '#ffffff',
-          padding: '2rem',
-        };
-      
-      case 'sepia':
-        return {
-          ...baseStyles,
-          fontFamily: 'Georgia, serif',
-          color: '#704214',
-          backgroundColor: '#f4ecd8',
-        };
-      
-      default: // default theme
-        return {
-          ...baseStyles,
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          color: darkMode ? '#f0f0f0' : '#333333',
-          backgroundColor: darkMode ? '#2d2d2d' : '#ffffff',
-        };
+      // Clean up
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting HTML:', error);
     }
-  }, [fontSize, previewTheme, darkMode]);
-  
-  // Memoized component renderers for better performance
-  const componentRenderers = useMemo(() => ({
-    h1: ({ children, ...props }: any) => (
-      <h1 style={{ borderBottom: '1px solid #ddd', paddingBottom: '0.3em' }} {...props}>
-        {children}
-      </h1>
-    ),
-    h2: ({ children, ...props }: any) => (
-      <h2 style={{ borderBottom: '1px solid #ddd', paddingBottom: '0.3em' }} {...props}>
-        {children}
-      </h2>
-    ),
-    blockquote: ({ children, ...props }: any) => (
-      <blockquote 
-        style={{ 
-          borderLeft: '4px solid #ddd', 
-          paddingLeft: '1em', 
-          color: '#6a737d',
-          margin: '1em 0'
-        }} 
-        {...props}
-      >
-        {children}
-      </blockquote>
-    ),
-    code: (props: any) => {
-      const { children, className, node, ...rest } = props;
-      const match = /language-(\w+)/.exec(className || '');
-      return match ? (
-        <pre className={className} style={{ margin: '1em 0' }}>
-          <code className={className} {...rest}>
-            {children}
-          </code>
-        </pre>
-      ) : (
-        <code className={className} {...rest}>
-          {children}
-        </code>
-      );
-    }
-  }), []);
+  };
   
   return (
-    <div 
-      className="previewer-container optimize-gpu" 
-      style={previewThemeStyles} 
-      ref={previewerRef}
-    >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeSanitize]}
-        components={componentRenderers}
+    <div className="previewer-container">
+      <div className="previewer-header">
+        <h3>Preview</h3>
+        <div className="editor-actions">
+          <button 
+            onClick={exportAsHTML}
+            className="editor-action-button"
+            title="Export as HTML"
+          >
+            <IconDownload size={18} />
+          </button>
+        </div>
+      </div>
+      
+      <div 
+        ref={previewerRef} 
+        className="previewer-content"
+        style={{
+          fontSize: `${fontSize}px`,
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          lineHeight: '1.6',
+          wordWrap: 'break-word'
+        }}
       >
-        {content}
-      </ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw, rehypeSanitize]}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 });

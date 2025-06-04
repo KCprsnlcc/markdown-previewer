@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { IconSearch, IconPlus, IconTag, IconX, IconUpload, IconEdit } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconTag, IconX, IconUpload, IconEdit, IconFilter } from '@tabler/icons-react';
 import { MarkdownDocument } from '../supabase';
 import { showSuccess, showError, showInfo } from '../utils/toast';
 
@@ -306,6 +306,7 @@ const Sidebar: React.FC = () => {
   
   return (
     <div 
+      className="sidebar"
       style={{
         ...sidebarStyle,
         ...(isDragging && {
@@ -317,247 +318,187 @@ const Sidebar: React.FC = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div style={headerStyle}>
-        <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Documents</h2>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <input 
-            type="file" 
-            ref={fileInputRef}
-            style={{ display: 'none' }} 
-            accept=".md,.txt,text/markdown,text/plain" 
-            onChange={handleFileUpload}
-            multiple
-          />
-          <button 
-            style={buttonStyle} 
-            onClick={() => fileInputRef.current?.click()}
-            title="Import Markdown File"
-          >
-            <IconUpload size={18} />
-          </button>
-          <button 
-            style={buttonStyle} 
-            onClick={createNewDocument}
-            title="Create New Document"
-          >
-            <IconPlus size={18} />
-          </button>
+      {isDragging ? (
+        <div className="drag-active">
+          <p>Drop markdown files here to import</p>
         </div>
-      </div>
-      
-      <div style={searchContainerStyle}>
-        <form onSubmit={handleSearch}>
-          <div style={{ position: 'relative' }}>
+      ) : (
+        <>
+          {/* Search section */}
+          <form onSubmit={handleSearch} className="sidebar-search">
+            <IconSearch size={16} opacity={0.7} />
             <input
               type="text"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="Search..."
-              style={searchInputStyle}
+              placeholder="Search documents..."
+              aria-label="Search documents"
             />
-            <button
-              type="submit"
-              style={{
-                position: 'absolute',
-                right: '0.5rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
-              }}
-            >
-              <IconSearch size={18} />
-            </button>
-          </div>
-        </form>
-      </div>
-      
-      <div style={tagsContainerStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-          <h3 style={{ margin: 0, fontSize: '1rem' }}>Tags</h3>
-          {!showTagInput && (
-            <button
-              style={{
-                ...buttonStyle,
-                padding: '0.25rem',
-              }}
-              onClick={() => setShowTagInput(true)}
-              title="Add Tag Filter"
-            >
-              <IconPlus size={14} />
-            </button>
-          )}
-        </div>
-        
-        {showTagInput && (
-          <form onSubmit={handleAddTag} style={{ marginBottom: '0.5rem' }}>
-            <div style={{ display: 'flex' }}>
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                placeholder="Add tag..."
-                style={{
-                  ...searchInputStyle,
-                  flex: 1,
-                }}
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={() => setShowTagInput(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
-                  marginLeft: '0.5rem',
-                }}
-              >
-                <IconX size={18} />
-              </button>
-            </div>
           </form>
-        )}
-        
-        <div>
-          {selectedTags.length > 0 && (
-            <div style={{ marginBottom: '0.5rem' }}>
-              <small style={{ fontWeight: 'bold' }}>Selected:</small>
-              {selectedTags.map(tag => (
-                <span
-                  key={tag}
-                  style={tagStyle(true)}
-                  onClick={() => handleTagSelect(tag)}
-                >
-                  {tag} <IconX size={12} />
-                </span>
-              ))}
-            </div>
-          )}
           
-          {allTags
-            .filter(tag => !selectedTags.includes(tag))
-            .map(tag => (
-              <span
+          {/* Documents actions */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <button 
+              onClick={() => createNewDocument()}
+              className="add-document-btn"
+              aria-label="Create new document"
+            >
+              <IconPlus size={18} /> New Document
+            </button>
+            
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="editor-action-button"
+              style={{ padding: '0.75rem', backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
+              aria-label="Import markdown files"
+              title="Import markdown files"
+            >
+              <IconUpload size={18} />
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
+              accept=".md,text/markdown,text/plain"
+              multiple
+            />
+          </div>
+          
+          {/* Tags filter */}
+          <div className="sidebar-section-title">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <IconFilter size={16} />
+              <span>Filter by Tags</span>
+            </div>
+          </div>
+          
+          <div className="tag-container">
+            {allTags.map(tag => (
+              <div
                 key={tag}
-                style={tagStyle(false)}
                 onClick={() => handleTagSelect(tag)}
+                className={`tag ${selectedTags.includes(tag) ? 'selected' : ''}`}
               >
                 {tag}
-              </span>
+                {selectedTags.includes(tag) && (
+                  <IconX size={14} style={{ marginLeft: '0.25rem' }} />
+                )}
+              </div>
             ))}
-        </div>
-      </div>
-      
-      <div style={documentListStyle}>
-        {isLoading ? (
-          <div style={{ padding: '1rem', textAlign: 'center' }}>Loading...</div>
-        ) : documents.length === 0 ? (
-          <div style={{ padding: '1rem', textAlign: 'center' }}>
-            No documents found
-            {searchQuery && <div>Try a different search term</div>}
-            {selectedTags.length > 0 && <div>Try removing some tag filters</div>}
+            
+            {showTagInput ? (
+              <form onSubmit={handleAddTag}>
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  placeholder="New tag..."
+                  autoFocus
+                  onBlur={() => setShowTagInput(false)}
+                  style={{
+                    border: 'none',
+                    borderBottom: `1px solid ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                    background: 'transparent',
+                    padding: '0.25rem 0',
+                    outline: 'none',
+                    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
+                    width: '100px'
+                  }}
+                />
+              </form>
+            ) : (
+              <div
+                className="tag"
+                onClick={() => setShowTagInput(true)}
+                style={{ cursor: 'pointer', backgroundColor: 'transparent' }}
+              >
+                <IconPlus size={14} style={{ marginRight: '0.25rem' }} /> Add
+              </div>
+            )}
           </div>
-        ) : (
-          documents.map(doc => (
-            <div
-              key={doc.id}
-              style={{
-                ...documentItemStyle(currentDocument?.id === doc.id),
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-            >
-              {renamingDocId === doc.id ? (
-                <form 
-                  onSubmit={(e) => handleRename(doc.id, e)} 
-                  style={{ flex: 1, display: 'flex' }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <input
-                    ref={renameInputRef}
-                    type="text"
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                    style={{
-                      ...searchInputStyle,
-                      flex: 1,
-                      padding: '0.25rem 0.5rem',
-                    }}
-                    onBlur={() => handleRename(doc.id, { preventDefault: () => {} } as React.FormEvent)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') {
-                        cancelRenaming();
-                      }
-                    }}
-                  />
-                </form>
-              ) : (
-                <>
-                  <div 
-                    style={{ 
-                      flex: 1,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      cursor: 'pointer'
-                    }} 
-                    onClick={() => selectDocument(doc)}
-                  >
-                    {doc.title}
-                  </div>
-                  <div style={{ display: 'flex' }}>
-                    <button
-                      onClick={(e) => startRenaming(doc, e)}
-                      style={{
-                        ...iconButtonStyle,
-                        marginRight: '4px',
-                        visibility: 'hidden'
-                      }}
-                      title="Rename document"
-                      className="document-action-btn"
-                    >
-                      <IconEdit size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (window.confirm(`Are you sure you want to delete "${doc.title}"?`)) {
-                          if (currentDocument?.id === doc.id) {
-                            deleteCurrentDocument();
-                          } else {
-                            selectDocument(doc);
-                            setTimeout(() => deleteCurrentDocument(), 100);
-                          }
-                        }
-                      }}
-                      style={{
-                        ...iconButtonStyle,
-                        visibility: 'hidden'
-                      }}
-                      title="Delete document"
-                      className="document-action-btn"
-                    >
-                      <IconX size={16} />
-                    </button>
-                  </div>
-                </>
-              )}
+          
+          {/* Documents list */}
+          <div className="sidebar-section-title" style={{ marginTop: '1.5rem' }}>
+            Documents {isLoading && <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>(loading...)</span>}
+          </div>
+          
+          {documents.length === 0 ? (
+            <div style={{ padding: '1rem 0', color: darkMode ? 'var(--text-dark-secondary)' : 'var(--text-light-secondary)', fontSize: '0.875rem', textAlign: 'center' }}>
+              {isLoading ? 'Loading documents...' : 'No documents yet. Create one to get started!'}
             </div>
-          ))
-        )}
-      </div>
-      <style>
-        {`
-          div:hover > .document-action-btn {
-            visibility: visible !important;
-          }
-        `}
-      </style>
+          ) : (
+            <div>
+              {documents
+                .filter(doc => {
+                  // Tag filtering
+                  if (selectedTags.length > 0) {
+                    if (!doc.tags || doc.tags.length === 0) return false;
+                    return selectedTags.every(tag => doc.tags?.includes(tag));
+                  }
+                  return true;
+                })
+                .filter(doc => {
+                  // Search filtering
+                  if (!searchQuery) return true;
+                  const query = searchQuery.toLowerCase();
+                  return (
+                    doc.title.toLowerCase().includes(query) ||
+                    doc.content.toLowerCase().includes(query)
+                  );
+                })
+                .sort((a, b) => {
+                  // Sort by updated date (newest first)
+                  return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+                })
+                .map(doc => (
+                  <div
+                    key={doc.id}
+                    onClick={() => selectDocument(doc)}
+                    className={`document-item ${currentDocument?.id === doc.id ? 'active' : ''}`}
+                  >
+                    {renamingDocId === doc.id ? (
+                      <form onSubmit={(e) => handleRename(doc.id, e)} style={{ width: '100%' }}>
+                        <input
+                          ref={renameInputRef}
+                          type="text"
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onBlur={() => cancelRenaming()}
+                          style={{
+                            border: 'none',
+                            borderBottom: `1px solid ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                            background: 'transparent',
+                            padding: '0.25rem 0',
+                            outline: 'none',
+                            color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
+                            width: '100%'
+                          }}
+                        />
+                      </form>
+                    ) : (
+                      <>
+                        <div className="document-title" style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {doc.title || 'Untitled'}
+                        </div>
+                        
+                        <div style={{ opacity: 0.7, fontSize: '0.75rem', marginLeft: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            onClick={(e) => startRenaming(doc, e)}
+                            className="document-close-btn"
+                            aria-label="Rename document"
+                          >
+                            <IconEdit size={16} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

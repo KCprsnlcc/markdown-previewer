@@ -153,15 +153,15 @@ const AppContent = memo(({
     
     debounceScroll(() => {
       // Calculate scroll percentage
-      const scrollPercentage = scrollInfo.scrollTop / (scrollInfo.scrollHeight - scrollInfo.clientHeight);
+      const scrollPercentage = scrollInfo.scrollTop / (scrollInfo.scrollHeight - scrollInfo.clientHeight || 1);
       
       // Update preview scroll position if preview is visible
       if (!hidePreview) {
-        const previewElement = document.querySelector('.previewer-container');
-        if (previewElement) {
-          const previewScrollHeight = previewElement.scrollHeight;
-          const previewClientHeight = previewElement.clientHeight;
-          const previewTargetScrollTop = scrollPercentage * (previewScrollHeight - previewClientHeight);
+        const previewContent = document.querySelector('.previewer-content');
+        if (previewContent) {
+          const previewScrollHeight = previewContent.scrollHeight;
+          const previewClientHeight = previewContent.clientHeight;
+          const previewTargetScrollTop = scrollPercentage * (previewScrollHeight - previewClientHeight || 1);
           
           setPreviewScrollPosition(previewTargetScrollTop);
         }
@@ -174,7 +174,7 @@ const AppContent = memo(({
     // Reset scroll source after a short delay
     setTimeout(() => {
       scrollSourceRef.current = null;
-    }, 50);
+    }, 100);
   }, [hidePreview, debounceScroll]);
   
   // Optimized Preview scroll handler
@@ -185,15 +185,15 @@ const AppContent = memo(({
     
     debounceScroll(() => {
       // Calculate scroll percentage
-      const scrollPercentage = scrollInfo.scrollTop / (scrollInfo.scrollHeight - scrollInfo.clientHeight);
+      const scrollPercentage = scrollInfo.scrollTop / (scrollInfo.scrollHeight - scrollInfo.clientHeight || 1);
       
       // Update editor scroll position if editor is visible
       if (!hideEditor) {
-        const editorElement = document.querySelector('textarea');
-        if (editorElement) {
-          const editorScrollHeight = editorElement.scrollHeight;
-          const editorClientHeight = editorElement.clientHeight;
-          const editorTargetScrollTop = scrollPercentage * (editorScrollHeight - editorClientHeight);
+        const editorTextArea = document.querySelector('.editor-textarea');
+        if (editorTextArea) {
+          const editorScrollHeight = editorTextArea.scrollHeight;
+          const editorClientHeight = editorTextArea.clientHeight;
+          const editorTargetScrollTop = scrollPercentage * (editorScrollHeight - editorClientHeight || 1);
           
           setEditorScrollPosition(editorTargetScrollTop);
         }
@@ -206,7 +206,7 @@ const AppContent = memo(({
     // Reset scroll source after a short delay
     setTimeout(() => {
       scrollSourceRef.current = null;
-    }, 50);
+    }, 100);
   }, [hideEditor, debounceScroll]);
   
   // Memoized scroll to top function
@@ -272,9 +272,9 @@ const AppContent = memo(({
         
         <div style={contentContainerStyle}>
           {currentDocument ? (
-            <>
+            <div className="split-view">
               {!hideEditor && (
-                <div style={panelStyle} className="optimize-gpu editor-enter">
+                <div className="editor-panel optimize-gpu editor-enter">
                   <Editor 
                     content={currentDocument.content} 
                     onChange={handleDocumentChange}
@@ -285,7 +285,7 @@ const AppContent = memo(({
               )}
               
               {!hidePreview && (
-                <div style={panelStyle} className="optimize-gpu preview-enter">
+                <div className="preview-panel optimize-gpu preview-enter">
                   <Previewer 
                     content={currentDocument.content}
                     onScroll={handlePreviewScroll}
@@ -293,7 +293,7 @@ const AppContent = memo(({
                   />
                 </div>
               )}
-            </>
+            </div>
           ) : (
             <div className="bounce-in" style={{
               display: 'flex',
