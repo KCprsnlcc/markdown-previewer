@@ -4,6 +4,7 @@ import { IconSearch, IconPlus, IconX, IconUpload, IconEdit, IconFilter, IconTras
 import { MarkdownDocument } from '../supabase';
 import { showSuccess, showError } from '../utils/toast';
 import { Modal, Button, Group, Text } from '@mantine/core';
+import Logo from '../components/Logo';
 
 // Import MobileSidebarContext from App component
 import { MobileSidebarContext } from '../App';
@@ -280,7 +281,7 @@ const Sidebar: React.FC = () => {
     >
       {/* Mobile sidebar header is only shown on mobile */}
       <div className="mobile-sidebar-header">
-        <h2>MarkDown</h2>
+        <Logo size="small" />
         <button 
           className="mobile-close-button"
           onClick={() => {
@@ -289,6 +290,7 @@ const Sidebar: React.FC = () => {
               mobileSidebarContext.setShowMobileSidebar(false);
             }
           }}
+          aria-label="Close sidebar"
         >
           <IconX size={20} />
         </button>

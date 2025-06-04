@@ -676,115 +676,12 @@ textarea:focus, input:focus {
 }
 
 .document-item.active {
-  border-left-color: var(--primary-color);
-  background-color: rgba(37, 99, 235, 0.08);
+  background-color: var(--bg-light-selected);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .dark-mode .document-item:hover {
   background-color: rgba(59, 130, 246, 0.1);
-}
-
-.dark-mode .document-item.active {
-  border-left-color: var(--primary-light);
-  background-color: rgba(59, 130, 246, 0.15);
-}
-
-/* Sidebar styling */
-.sidebar {
-  width: 240px;
-  height: 100%;
-  border-right: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  background-color: var(--bg-light);
-  color: var(--text-light);
-  overflow-y: auto;
-  overflow-x: hidden;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-}
-
-.dark-mode .sidebar {
-  background-color: var(--bg-dark);
-  border-right: 1px solid var(--border-color-dark);
-  color: var(--text-dark);
-}
-
-.sidebar-content {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow-y: auto;
-}
-
-.sidebar-section {
-  margin-bottom: 1.25rem;
-}
-
-.sidebar-section:last-child {
-  margin-bottom: 0;
-  flex-grow: 1;
-}
-
-.sidebar-section-title {
-  padding: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-light-secondary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.dark-mode .sidebar-section-title {
-  color: var(--text-dark-secondary);
-}
-
-.loading-indicator {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  margin-left: 0.5rem;
-}
-
-.documents-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.no-documents-message {
-  padding: 1rem 0.5rem;
-  color: var(--text-light-secondary);
-  font-size: 0.875rem;
-  text-align: center;
-}
-
-.dark-mode .no-documents-message {
-  color: var(--text-dark-secondary);
-}
-
-.document-item {
-  padding: 0.6rem 0.75rem;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.document-item:hover {
-  background-color: var(--bg-light-hover);
-}
-
-.document-item.active {
-  background-color: var(--bg-light-selected);
-}
-
-.dark-mode .document-item:hover {
-  background-color: var(--bg-dark-hover);
 }
 
 .dark-mode .document-item.active {
@@ -978,12 +875,44 @@ textarea:focus, input:focus {
 
 /* Mobile phones */
 @media (max-width: 576px) {
+  /* Force icons to be visible in mobile view */
+  svg {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: inline-block !important;
+    width: initial !important;
+    height: initial !important;
+  }
+  
+  /* Specific icon sizes for better appearance */
+  .header-action-button svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
+  .document-action-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  /* Ensure "New Document" button icon is visible */
+  .slide-in button svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
+  /* Mobile hamburger menu icon */
+  .hamburger-icon span {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
   .responsive-layout {
     flex-direction: column;
   }
 
   .app-header {
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     height: 56px;
     position: sticky;
     top: 0;
@@ -994,18 +923,94 @@ textarea:focus, input:focus {
     background-color: rgba(var(--bg-light-rgb), 0.95);
   }
   
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
   .header-action-button {
     padding: 0;
     width: 40px;
+    height: 40px;
     justify-content: center;
+    border-radius: 50%;
+    min-width: unset;
+    transform-origin: center;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+  
+  .header-action-button svg {
+    width: 20px;
+    height: 20px;
+    opacity: 1;
+    display: block;
   }
   
   .header-button-text {
     display: none;
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+  }
+  
+  .signout-button {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: none;
+  }
+  
+  .settings-button {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dark-mode .signout-button {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .header-action-button:active {
+    transform: scale(0.95);
   }
   
   .mobile-sidebar-header {
     display: flex;
+    padding: 0.75rem 1rem;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    height: 60px;
+    background-color: var(--bg-light);
+  }
+  
+  .dark-mode .mobile-sidebar-header {
+    background-color: var(--bg-dark);
+    border-bottom-color: var(--border-color-dark);
+  }
+
+  .mobile-close-button {
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .dark-mode .mobile-close-button {
+    color: var(--text-dark);
+  }
+  
+  .mobile-close-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .dark-mode .mobile-close-button:hover {
+    background-color: rgba(255, 255, 255, 0.05);
   }
   
   .sidebar {
@@ -1018,8 +1023,8 @@ textarea:focus, input:focus {
     z-index: 1000;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    border-radius: 0 10px 10px 0;
+    box-shadow: var(--shadow-lg);
+    border-radius: 0 12px 12px 0;
     overflow-y: auto;
   }
 
@@ -1053,25 +1058,20 @@ textarea:focus, input:focus {
   .sidebar-enter.show-mobile .sidebar {
     transform: translateX(0);
     z-index: 1001;
+    animation: slideInSidebar 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-
-  .mobile-sidebar-header {
-    display: flex;
-    padding: 0.75rem 1rem;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    height: 60px;
+  
+  @keyframes slideInSidebar {
+    from { transform: translateX(-10px); opacity: 0.9; }
+    to { transform: translateX(0); opacity: 1; }
   }
-
-  .mobile-sidebar-header h2 {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--text-light);
-    margin: 0;
-  }
-
+  
   .toolbar-mobile-toggle {
     display: flex !important;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
   }
 
   .split-view {
@@ -1106,6 +1106,76 @@ textarea:focus, input:focus {
   
   .document-actions {
     opacity: 0.7;
+  }
+  
+  /* Enhanced document item styles for mobile */
+  .document-item {
+    padding: 0.75rem;
+    margin: 0.5rem 0.5rem;
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+  }
+  
+  .document-actions svg {
+    width: 16px;
+    height: 16px;
+    opacity: 1;
+    display: block;
+  }
+  
+  .document-action-btn {
+    visibility: visible !important;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-sm);
+  }
+  
+  .dark-mode .document-action-btn {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .document-item.active {
+    background-color: var(--bg-light-selected);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .document-actions-container {
+    padding: 0.75rem 0.5rem;
+    margin: 0.25rem 0.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0;
+  }
+  
+  .dark-mode .document-actions-container {
+    border-bottom-color: var(--border-color-dark);
+  }
+  
+  .tag-container {
+    padding: 0.25rem 0.5rem 0.75rem;
+    margin: 0 0.25rem;
+  }
+  
+  /* Fix icon visibility for all mobile buttons */
+  button svg, 
+  .header-action-button svg,
+  .document-action-button svg,
+  .mobile-close-button svg {
+    width: auto;
+    height: auto;
+    opacity: 1;
+    display: block;
+  }
+  
+  /* Ensure the New Document button icon is visible */
+  .slide-in button svg {
+    width: 20px;
+    height: 20px;
+    display: block;
   }
 }
 
@@ -1673,6 +1743,7 @@ textarea:focus, input:focus {
 
 .header-button-text {
   display: inline-block;
+  transition: opacity 0.3s ease;
 }
 
 .signout-button {
@@ -1716,11 +1787,11 @@ textarea:focus, input:focus {
   background: transparent;
   border: none;
   padding: 0.5rem;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-right: 0.75rem;
   cursor: pointer;
   color: var(--text-light);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   width: 40px;
   height: 40px;
 }
@@ -1763,14 +1834,17 @@ textarea:focus, input:focus {
 
 .hamburger-icon.open span:first-child {
   transform: rotate(45deg) translate(5px, 5px);
+  width: 90%;
 }
 
 .hamburger-icon.open span:nth-child(2) {
   opacity: 0;
+  transform: translateX(-5px);
 }
 
 .hamburger-icon.open span:last-child {
   transform: rotate(-45deg) translate(5px, -5px);
+  width: 90%;
 }
 
 /* Mobile sidebar overlay */
@@ -1807,4 +1881,175 @@ textarea:focus, input:focus {
   font-weight: 600;
   color: var(--text-light);
   margin: 0;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 240px;
+  height: 100%;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-light);
+  color: var(--text-light);
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.dark-mode .sidebar {
+  background-color: var(--bg-dark);
+  border-right: 1px solid var(--border-color-dark);
+  color: var(--text-dark);
+}
+
+.sidebar-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  margin-bottom: 1.25rem;
+}
+
+.sidebar-section:last-child {
+  margin-bottom: 0;
+  flex-grow: 1;
+}
+
+.sidebar-section-title {
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-light-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dark-mode .sidebar-section-title {
+  color: var(--text-dark-secondary);
+}
+
+.loading-indicator {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-left: 0.5rem;
+}
+
+.documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.no-documents-message {
+  padding: 1rem 0.5rem;
+  color: var(--text-light-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.dark-mode .no-documents-message {
+  color: var(--text-dark-secondary);
+}
+
+.document-item {
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.document-item:hover {
+  background-color: var(--bg-light-hover);
+}
+
+.document-item.active {
+  background-color: var(--bg-light-selected);
+}
+
+.dark-mode .document-item:hover {
+  background-color: var(--bg-dark-hover);
+}
+
+@media (max-width: 576px) {
+  /* Mobile-specific fixes for icon visibility */
+  svg {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Fix all buttons in mobile view to ensure icons are visible */
+  button svg,
+  .header-action-button svg,
+  .document-action-button svg,
+  .mobile-close-button svg,
+  .document-action-btn svg {
+    display: block !important;
+    width: auto;
+    height: auto;
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Ensure the New Document button icon is visible */
+  .slide-in button svg {
+    display: inline-block !important;
+  }
+}
+
+/* Hamburger menu animation - ensure visibility */
+.hamburger-icon {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  transition: transform 0.3s ease;
+}
+
+.hamburger-icon span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 576px) {
+  .toolbar-mobile-toggle {
+    display: flex !important;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+  }
+  
+  .dark-mode .toolbar-mobile-toggle {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .hamburger-icon {
+    display: flex !important;
+  }
+  
+  .hamburger-icon span {
+    width: 100% !important;
+    height: 2px !important;
+    background-color: currentColor !important;
+    margin: 2px 0 !important;
+    display: block !important;
+  }
 }

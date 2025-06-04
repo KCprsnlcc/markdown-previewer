@@ -270,7 +270,7 @@ const AppContent = memo(({
                 aria-label="Sign Out"
                 title="Sign Out"
               >
-                <IconLogout size={20} />
+                <IconLogout size={20} stroke={1.5} />
                 <span className="header-button-text">Sign Out</span>
               </button>
               <button
@@ -279,7 +279,7 @@ const AppContent = memo(({
                 aria-label="Settings"
                 title="Settings"
               >
-                <IconSettings size={20} />
+                <IconSettings size={20} stroke={1.5} />
                 <span className="header-button-text">Settings</span>
               </button>
             </div>
