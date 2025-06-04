@@ -313,10 +313,9 @@ const AppContent = memo(({
         </div>
       </div>
       
+      {/* Settings panel */}
       {settingsPanelOpen && (
-        <div className="settings-enter">
-          <SettingsPanel isOpen={settingsPanelOpen} onClose={() => setSettingsPanelOpen(false)} />
-        </div>
+        <SettingsPanel isOpen={settingsPanelOpen} onClose={() => setSettingsPanelOpen(false)} />
       )}
       
       {showScrollToTop && (
