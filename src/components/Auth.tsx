@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { IconMail, IconLock, IconBrandGithub, IconLogin, IconUserPlus } from '@tabler/icons-react';
+import { IconMail, IconLock, IconBrandGithub, IconLogin, IconUserPlus, IconArrowRight } from '@tabler/icons-react';
 import { showSuccess, showError } from '../utils/toast';
+import Logo from './Logo';
 
 enum AuthMode {
   SignIn,
@@ -18,8 +19,6 @@ const Auth: React.FC = () => {
   // No longer using state for error/message display, using toasts instead
   const { signIn, signUp, resetPassword, isLoading } = useAuth();
   
-
-
   // Check screen size for responsive design
   useEffect(() => {
     const checkScreenSize = () => {
@@ -116,37 +115,39 @@ const Auth: React.FC = () => {
   };
 
   const getContainerStyle = (): React.CSSProperties => ({
-    maxWidth: isSmallScreen ? '90%' : '400px',
+    maxWidth: isSmallScreen ? '92%' : '460px',
     width: '100%',
     margin: '0 auto',
-    padding: isSmallScreen ? '1.5rem' : '2rem',
+    padding: isSmallScreen ? '2rem 1.5rem' : '2.5rem',
     borderRadius: 'var(--radius-lg)',
     backgroundColor: 'var(--input-bg-light)',
-    boxShadow: 'var(--shadow-md)',
+    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
     color: 'var(--text-light)',
-    animation: 'bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+    animation: 'bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+    border: '1px solid rgba(0, 0, 0, 0.05)'
   });
 
   const getInputContainerStyle = (): React.CSSProperties => ({
-    marginBottom: '1.25rem',
+    marginBottom: '1.5rem',
     position: 'relative',
   });
 
   const getInputStyle = (): React.CSSProperties => ({
     width: '100%',
-    padding: '0.75rem 0.75rem 0.75rem 2.5rem',
-    borderRadius: 'var(--radius-md)',
-    border: '1px solid var(--border-color)',
+    padding: '0.85rem 1rem 0.85rem 3rem',
+    borderRadius: '12px',
+    border: '1.5px solid var(--border-color)',
     fontSize: '1rem',
-    backgroundColor: 'var(--input-bg-light)',
+    backgroundColor: 'white',
     color: 'var(--text-light)',
     transition: 'all var(--transition-normal)',
     outline: 'none',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)'
   });
 
   const getIconStyle = (): React.CSSProperties => ({
     position: 'absolute',
-    left: '0.75rem',
+    left: '1rem',
     top: '50%',
     transform: 'translateY(-50%)',
     color: 'var(--primary-color)',
@@ -157,21 +158,23 @@ const Auth: React.FC = () => {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 1.5rem',
-    borderRadius: 'var(--radius-md)',
+    padding: isPrimary ? '0.85rem 1.75rem' : '0.85rem 1.5rem',
+    borderRadius: '12px',
     fontSize: '1rem',
     fontWeight: 500,
     cursor: 'pointer',
     transition: 'all var(--transition-fast)',
-    border: 'none',
+    border: isPrimary ? 'none' : '1.5px solid var(--border-color)',
     backgroundColor: isPrimary ? 'var(--primary-color)' : 'transparent',
     color: isPrimary ? '#fff' : 'var(--text-light)',
+    boxShadow: isPrimary ? '0 4px 10px rgba(var(--primary-rgb), 0.25)' : 'none'
   });
 
   const getLinkStyle = (): React.CSSProperties => ({
     color: 'var(--primary-color)',
     cursor: 'pointer',
-    fontSize: '0.875rem',
+    fontSize: '0.9rem',
+    fontWeight: 500,
     textDecoration: 'none',
     transition: 'color var(--transition-fast)',
   });
@@ -187,7 +190,7 @@ const Auth: React.FC = () => {
     <form onSubmit={handleSignIn} className="slide-in">
       <div style={getInputContainerStyle()}>
         <div style={getIconStyle()}>
-          <IconMail size={18} />
+          <IconMail size={20} />
         </div>
         <input
           type="email"
@@ -200,7 +203,7 @@ const Auth: React.FC = () => {
       </div>
       <div style={getInputContainerStyle()}>
         <div style={getIconStyle()}>
-          <IconLock size={18} />
+          <IconLock size={20} />
         </div>
         <input
           type="password"
@@ -211,7 +214,7 @@ const Auth: React.FC = () => {
           autoComplete="current-password"
         />
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
         <div>
           <a 
             onClick={() => setMode(AuthMode.ForgotPassword)} 
@@ -228,7 +231,7 @@ const Auth: React.FC = () => {
           disabled={isLoading}
           className="hover-lift"
         >
-          <IconLogin size={18} />
+          <IconLogin size={20} />
           {isLoading ? 'Signing in...' : 'Sign In'}
         </button>
         <button 
@@ -236,7 +239,7 @@ const Auth: React.FC = () => {
           style={getButtonStyle(false)}
           onClick={() => setMode(AuthMode.SignUp)}
         >
-          <IconUserPlus size={18} />
+          <IconUserPlus size={20} />
           Sign Up
         </button>
       </div>
@@ -247,7 +250,7 @@ const Auth: React.FC = () => {
     <form onSubmit={handleSignUp} className="slide-in">
       <div style={getInputContainerStyle()}>
         <div style={getIconStyle()}>
-          <IconMail size={18} />
+          <IconMail size={20} />
         </div>
         <input
           type="email"
@@ -260,7 +263,7 @@ const Auth: React.FC = () => {
       </div>
       <div style={getInputContainerStyle()}>
         <div style={getIconStyle()}>
-          <IconLock size={18} />
+          <IconLock size={20} />
         </div>
         <input
           type="password"
@@ -273,7 +276,7 @@ const Auth: React.FC = () => {
       </div>
       <div style={getInputContainerStyle()}>
         <div style={getIconStyle()}>
-          <IconLock size={18} />
+          <IconLock size={20} />
         </div>
         <input
           type="password"
@@ -291,7 +294,7 @@ const Auth: React.FC = () => {
           disabled={isLoading}
           className="hover-lift"
         >
-          <IconUserPlus size={18} />
+          <IconUserPlus size={20} />
           {isLoading ? 'Signing up...' : 'Create Account'}
         </button>
         <button 
@@ -299,7 +302,7 @@ const Auth: React.FC = () => {
           style={getButtonStyle(false)}
           onClick={() => setMode(AuthMode.SignIn)}
         >
-          <IconLogin size={18} />
+          <IconLogin size={20} />
           Sign In
         </button>
       </div>
@@ -310,7 +313,7 @@ const Auth: React.FC = () => {
     <form onSubmit={handleResetPassword} className="slide-in">
       <div style={getInputContainerStyle()}>
         <div style={getIconStyle()}>
-          <IconMail size={18} />
+          <IconMail size={20} />
         </div>
         <input
           type="email"
@@ -328,6 +331,7 @@ const Auth: React.FC = () => {
           disabled={isLoading}
           className="hover-lift"
         >
+          <IconArrowRight size={20} />
           {isLoading ? 'Sending...' : 'Reset Password'}
         </button>
         <button 
@@ -348,32 +352,52 @@ const Auth: React.FC = () => {
       justifyContent: 'center', 
       alignItems: 'center',
       height: '100%',
-      padding: '1rem',
-      backgroundColor: 'var(--bg-light)'
+      padding: '1.5rem',
+      background: 'linear-gradient(145deg, var(--bg-light), #f1f3f9)'
     }} className="optimize-gpu">
       <div style={getContainerStyle()} className="bounce-in">
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{ 
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <div style={{ 
+            marginBottom: '1.5rem', 
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center' 
+          }}>
+            <Logo size="large" showText={true} />
+          </div>
+          <h2 style={{ 
             fontSize: '1.75rem', 
             fontWeight: 600, 
-            marginBottom: '0.5rem',
-          }} className="logo-text">
-            Markdown Previewer
-          </h1>
-          <p style={{ color: 'var(--text-light)', opacity: 0.8 }} className="slide-in">
-            {mode === AuthMode.SignIn && 'Sign in to access your documents'}
-            {mode === AuthMode.SignUp && 'Create an account to get started'}
-            {mode === AuthMode.ForgotPassword && 'Reset your password'}
+            marginBottom: '0.75rem',
+            background: 'linear-gradient(90deg, var(--primary-color), var(--accent-color, #7c4dff))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            {mode === AuthMode.SignIn && 'Sign In'}
+            {mode === AuthMode.SignUp && 'Create Account'}
+            {mode === AuthMode.ForgotPassword && 'Reset Password'}
+          </h2>
+          <p style={{ 
+            color: 'var(--text-light)', 
+            opacity: 0.8,
+            fontSize: '1.1rem',
+            maxWidth: '320px',
+            margin: '0 auto'
+          }} className="slide-in">
+            {mode === AuthMode.SignIn && 'Welcome back! Sign in to access your documents'}
+            {mode === AuthMode.SignUp && 'Join now to create and manage your markdown documents'}
+            {mode === AuthMode.ForgotPassword && 'Enter your email to receive a reset link'}
           </p>
         </div>
-
-        {/* Removed error and success messages - now using toast notifications */}
-        
-
 
         {mode === AuthMode.SignIn && renderSignIn()}
         {mode === AuthMode.SignUp && renderSignUp()}
         {mode === AuthMode.ForgotPassword && renderForgotPassword()}
+        
+        <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.9rem', opacity: 0.7 }}>
+          <p>The ultimate markdown editing experience</p>
+        </div>
       </div>
     </div>
   );

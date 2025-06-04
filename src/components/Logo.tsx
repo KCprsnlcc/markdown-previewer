@@ -26,8 +26,23 @@ const Logo: React.FC<LogoProps> = ({ showText = true, size = 'medium' }) => {
   // Brand colors from CSS variables
   const primaryColor = darkMode ? 'var(--primary-light)' : 'var(--primary-color)';
   
+  // Logo container style
+  const logoContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
+  };
+  
+  // Text style
+  const logoTextStyle: React.CSSProperties = { 
+    fontSize: fontSizeMap[size],
+    fontWeight: 600,
+    letterSpacing: '0.02em'
+  };
+  
   return (
-    <div className={`app-logo ${size}`}>
+    <div className={`app-logo ${size}`} style={logoContainerStyle}>
       <div className="logo-icon">
         <svg 
           width={sizeMap[size]} 
@@ -68,7 +83,7 @@ const Logo: React.FC<LogoProps> = ({ showText = true, size = 'medium' }) => {
       {showText && (
         <span 
           className="logo-text" 
-          style={{ fontSize: fontSizeMap[size] }}
+          style={logoTextStyle}
         >
           MarkDown
         </span>
