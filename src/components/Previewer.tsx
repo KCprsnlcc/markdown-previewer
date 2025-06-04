@@ -383,14 +383,14 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
       <div className="previewer-header">
         <h3>Preview</h3>
         <div className="editor-actions">
-          <button 
+          <button
             onClick={toggleSearch}
             className="editor-action-button"
             title="Search in preview"
           >
             <IconSearch size={18} />
           </button>
-          <button 
+          <button
             onClick={exportAsHTML}
             className="editor-action-button"
             title="Export as HTML"
@@ -399,7 +399,7 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
           </button>
         </div>
       </div>
-      
+
       {showSearch && (
         <div className="search-bar">
           <div className="search-input-container">
@@ -411,54 +411,57 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
               placeholder="Search in preview..."
               className="search-input"
             />
-            {searchText && searchResults.count > 0 && (
+            {searchResults.count > 0 && (
               <div className="search-counter">
-                {searchResults.currentIndex + 1} of {searchResults.count}
+                {searchResults.currentIndex + 1} / {searchResults.count}
               </div>
             )}
           </div>
           <div className="search-actions">
-            <button 
+            <button
+              className="search-nav-button"
               onClick={scrollToPrevMatch}
               disabled={searchResults.count === 0}
-              className="search-nav-button"
               title="Previous match"
             >
-              ↑
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
             </button>
-            <button 
+            <button
+              className="search-nav-button"
               onClick={scrollToNextMatch}
               disabled={searchResults.count === 0}
-              className="search-nav-button"
               title="Next match"
             >
-              ↓
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
             </button>
-            <button 
-              onClick={closeSearch}
-              className="search-close-button"
-              title="Close search"
-            >
+            <button className="search-close-button" onClick={closeSearch} title="Close search">
               <IconX size={16} />
             </button>
           </div>
         </div>
       )}
-      
+
       <div 
         ref={previewerRef} 
-        className="previewer-content"
-        style={{
+        className="previewer-content" 
+        onScroll={handleScroll}
+        tabIndex={0} 
+        style={{ 
           fontSize: `${fontSize}px`,
-          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          lineHeight: '1.6',
-          wordWrap: 'break-word'
+          height: showSearch ? 'calc(100% - 6rem)' : 'calc(100% - 3rem)',
         }}
-        tabIndex={0}
+        data-testid="preview-content"
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw, rehypeSanitize]}
+          components={{
+            // ... existing code ...
+          }}
         >
           {content}
         </ReactMarkdown>

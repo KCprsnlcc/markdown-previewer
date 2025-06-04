@@ -248,10 +248,13 @@ const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorPr
           >
             <IconSearch size={18} />
           </button>
-          <button 
+          <button
             onClick={handleSave}
             className="editor-action-button"
             title="Save document"
+            style={{
+              display: !autoSave ? 'flex' : 'none',
+            }}
           >
             <IconDeviceFloppy size={18} />
           </button>
@@ -272,37 +275,37 @@ const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorPr
               type="text"
               value={searchText}
               onChange={handleSearchChange}
-              placeholder="Search in editor..."
+              placeholder="Search in document..."
               className="search-input"
             />
-            {searchText && searchResults.count > 0 && (
+            {searchResults.count > 0 && (
               <div className="search-counter">
-                {searchResults.currentIndex + 1} of {searchResults.count}
+                {searchResults.currentIndex + 1} / {searchResults.count}
               </div>
             )}
           </div>
           <div className="search-actions">
-            <button 
+            <button
+              className="search-nav-button"
               onClick={goToPrevMatch}
               disabled={searchResults.count === 0}
-              className="search-nav-button"
               title="Previous match"
             >
-              ↑
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
             </button>
-            <button 
+            <button
+              className="search-nav-button"
               onClick={goToNextMatch}
               disabled={searchResults.count === 0}
-              className="search-nav-button"
               title="Next match"
             >
-              ↓
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
             </button>
-            <button 
-              onClick={closeSearch}
-              className="search-close-button"
-              title="Close search"
-            >
+            <button className="search-close-button" onClick={closeSearch} title="Close search">
               <IconX size={16} />
             </button>
           </div>
@@ -314,15 +317,12 @@ const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorPr
         value={value}
         onChange={handleChange}
         className="editor-textarea"
-        placeholder="Start typing your markdown here..."
         style={{
           fontSize: `${fontSize}px`,
-          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
-          lineHeight: '1.6',
-          wordWrap: 'break-word',
-          whiteSpace: 'pre-wrap'
+          height: showSearch ? 'calc(100% - 6rem)' : 'calc(100% - 3rem)',
         }}
         spellCheck={false}
+        data-testid="editor-textarea"
       />
     </div>
   );

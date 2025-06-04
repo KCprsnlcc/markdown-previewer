@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo, createContext } from 'react';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
@@ -7,11 +7,16 @@ import Previewer from './components/Previewer';
 import SettingsPanel from './components/SettingsPanel';
 import Logo from './components/Logo';
 import Auth from './components/Auth';
-import { IconSettings, IconArrowUp, IconLogout, IconPlus } from '@tabler/icons-react';
+import { IconSettings, IconArrowUp, IconLogout, IconMenu2, IconPlus } from '@tabler/icons-react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import { showError } from './utils/toast';
+
+// Create MobileSidebarContext and export it
+export const MobileSidebarContext = createContext<{
+  setShowMobileSidebar?: React.Dispatch<React.SetStateAction<boolean>>;
+}>({});
 
 const App: React.FC = () => {
   return (
@@ -88,6 +93,7 @@ const AppContent = memo(({
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const scrollSourceRef = useRef<'editor' | 'preview' | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   
   // Memoize styles to prevent recalculations on every render
   const containerStyle = React.useMemo<React.CSSProperties>(() => ({
@@ -232,162 +238,166 @@ const AppContent = memo(({
   }, []);
   
   return (
-    <div style={containerStyle} className="optimize-gpu">
-      {!hideSidebar && <div className="sidebar-enter"><Sidebar /></div>}
-      
-      <div style={mainContainerStyle}>
-        <div style={toolbarStyle} className="flex items-center justify-between">
-          <Logo size="medium" />
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button
-              onClick={() => signOut()}
-              style={{
+    <MobileSidebarContext.Provider value={{ setShowMobileSidebar }}>
+      <div style={containerStyle} className="optimize-gpu">
+        {!hideSidebar && (
+          <div className={`sidebar-enter ${showMobileSidebar ? 'show-mobile' : ''}`}>
+            <div className="sidebar-overlay" onClick={() => setShowMobileSidebar(false)}></div>
+            <Sidebar />
+          </div>
+        )}
+        
+        <div style={mainContainerStyle}>
+          <div className="app-header">
+            <div className="header-left">
+              <button 
+                className="toolbar-mobile-toggle"
+                onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+                aria-label="Toggle sidebar"
+              >
+                <div className={`hamburger-icon ${showMobileSidebar ? 'open' : ''}`}>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </button>
+              <Logo size="medium" />
+            </div>
+            <div className="header-actions">
+              <button
+                onClick={() => signOut()}
+                className="header-action-button signout-button"
+                aria-label="Sign Out"
+                title="Sign Out"
+              >
+                <IconLogout size={20} />
+                <span className="header-button-text">Sign Out</span>
+              </button>
+              <button
+                onClick={() => setSettingsPanelOpen(true)}
+                className="header-action-button settings-button"
+                aria-label="Settings"
+                title="Settings"
+              >
+                <IconSettings size={20} />
+                <span className="header-button-text">Settings</span>
+              </button>
+            </div>
+          </div>
+          
+          <div style={contentContainerStyle}>
+            {currentDocument ? (
+              <div className="split-view">
+                {!hideEditor && (
+                  <div className="editor-panel optimize-gpu editor-enter">
+                    <Editor 
+                      content={currentDocument.content} 
+                      onChange={handleDocumentChange}
+                      onScroll={handleEditorScroll}
+                      scrollToPosition={editorScrollPosition}
+                    />
+                  </div>
+                )}
+                
+                {!hidePreview && (
+                  <div className="preview-panel optimize-gpu preview-enter">
+                    <Previewer 
+                      content={currentDocument.content}
+                      onScroll={handlePreviewScroll}
+                      scrollToPosition={previewScrollPosition}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bounce-in" style={{
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                backgroundColor: 'transparent',
-                border: '1px solid var(--border-color)',
-                color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
-                cursor: 'pointer'
-              }}
-            >
-              <IconLogout size={18} />
-              Sign Out
-            </button>
-            <button
-              onClick={() => setSettingsPanelOpen(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                backgroundColor: 'var(--primary-color)',
-                color: '#fff',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <IconSettings size={18} />
-              Settings
-            </button>
+                justifyContent: 'center',
+                height: '100%',
+                width: '100%',
+                padding: '3rem',
+                textAlign: 'center',
+                maxWidth: '700px',
+                margin: '0 auto'
+              }}>
+                <h2 style={{ 
+                  marginBottom: '1rem', 
+                  marginTop: '0',
+                  fontSize: '2.5rem',
+                  fontWeight: 600,
+                  background: 'linear-gradient(90deg, var(--primary-color), var(--accent-color, #7c4dff))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }} className="slide-in">Get Started</h2>
+                <p className="slide-in" style={{ 
+                  animationDelay: '0.1s',
+                  fontSize: '1.2rem',
+                  lineHeight: '1.7',
+                  opacity: 0.9,
+                  maxWidth: '550px',
+                  marginBottom: '3rem'
+                }}>
+                  Create a new document or select an existing one from the sidebar to begin your markdown journey.
+                </p>
+                <div className="slide-in" style={{ 
+                  display: 'flex', 
+                  gap: '1rem', 
+                  animationDelay: '0.2s',
+                  marginTop: '0.5rem' 
+                }}>
+                  <button 
+                    onClick={() => {
+                      const sidebar = document.querySelector('.sidebar');
+                      if (sidebar) {
+                        const newButton = sidebar.querySelector('button[aria-label="New Document"]');
+                        if (newButton) {
+                          (newButton as HTMLButtonElement).click();
+                        }
+                      }
+                    }}
+                    style={{
+                      padding: '0.85rem 2rem',
+                      borderRadius: '10px',
+                      backgroundColor: 'var(--primary-color)',
+                      color: '#fff',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      fontWeight: 500,
+                      fontSize: '1.1rem',
+                      boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)'
+                    }}
+                  >
+                    <IconPlus size={20} />
+                    <span>New Document</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         
-        <div style={contentContainerStyle}>
-          {currentDocument ? (
-            <div className="split-view">
-              {!hideEditor && (
-                <div className="editor-panel optimize-gpu editor-enter">
-                  <Editor 
-                    content={currentDocument.content} 
-                    onChange={handleDocumentChange}
-                    onScroll={handleEditorScroll}
-                    scrollToPosition={editorScrollPosition}
-                  />
-                </div>
-              )}
-              
-              {!hidePreview && (
-                <div className="preview-panel optimize-gpu preview-enter">
-                  <Previewer 
-                    content={currentDocument.content}
-                    onScroll={handlePreviewScroll}
-                    scrollToPosition={previewScrollPosition}
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="bounce-in" style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              width: '100%',
-              padding: '3rem',
-              textAlign: 'center',
-              maxWidth: '700px',
-              margin: '0 auto'
-            }}>
-              <h2 style={{ 
-                marginBottom: '1rem', 
-                marginTop: '0',
-                fontSize: '2.5rem',
-                fontWeight: 600,
-                background: 'linear-gradient(90deg, var(--primary-color), var(--accent-color, #7c4dff))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }} className="slide-in">Get Started</h2>
-              <p className="slide-in" style={{ 
-                animationDelay: '0.1s',
-                fontSize: '1.2rem',
-                lineHeight: '1.7',
-                opacity: 0.9,
-                maxWidth: '550px',
-                marginBottom: '3rem'
-              }}>
-                Create a new document or select an existing one from the sidebar to begin your markdown journey.
-              </p>
-              <div className="slide-in" style={{ 
-                display: 'flex', 
-                gap: '1rem', 
-                animationDelay: '0.2s',
-                marginTop: '0.5rem' 
-              }}>
-                <button 
-                  onClick={() => {
-                    const sidebar = document.querySelector('.sidebar');
-                    if (sidebar) {
-                      const newButton = sidebar.querySelector('button[aria-label="New Document"]');
-                      if (newButton) {
-                        (newButton as HTMLButtonElement).click();
-                      }
-                    }
-                  }}
-                  style={{
-                    padding: '0.85rem 2rem',
-                    borderRadius: '10px',
-                    backgroundColor: 'var(--primary-color)',
-                    color: '#fff',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    fontWeight: 500,
-                    fontSize: '1.1rem',
-                    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)'
-                  }}
-                >
-                  <IconPlus size={20} />
-                  <span>New Document</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Settings panel */}
+        {settingsPanelOpen && (
+          <SettingsPanel isOpen={settingsPanelOpen} onClose={() => setSettingsPanelOpen(false)} />
+        )}
+        
+        {showScrollToTop && (
+          <button 
+            onClick={handleScrollToTop}
+            className={`scroll-to-top-button visible`}
+            aria-label="Scroll to top"
+          >
+            <IconArrowUp size={20} />
+          </button>
+        )}
       </div>
-      
-      {/* Settings panel */}
-      {settingsPanelOpen && (
-        <SettingsPanel isOpen={settingsPanelOpen} onClose={() => setSettingsPanelOpen(false)} />
-      )}
-      
-      {showScrollToTop && (
-        <button 
-          onClick={handleScrollToTop}
-          className={`scroll-to-top-button visible`}
-          aria-label="Scroll to top"
-        >
-          <IconArrowUp size={20} />
-        </button>
-      )}
-    </div>
+    </MobileSidebarContext.Provider>
   );
 });
 
