@@ -732,38 +732,132 @@ textarea:focus, input:focus {
 }
 
 /* Search bar styling */
-.sidebar-search {
+.search-bar {
   display: flex;
   align-items: center;
-  background-color: var(--input-bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-full);
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 1rem;
-  transition: all var(--transition-normal);
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-light-hover);
+  border-bottom: 1px solid var(--border-color);
+  gap: 0.5rem;
 }
 
-.dark-mode .sidebar-search {
-  background-color: var(--input-bg-dark);
+.dark-mode .search-bar {
+  background-color: var(--bg-dark-hover);
   border-color: var(--border-color-dark);
 }
 
-.sidebar-search:focus-within {
-  border-color: var(--primary-color);
-  box-shadow: var(--shadow-outline);
+.search-input-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  position: relative;
 }
 
-.sidebar-search input {
-  border: none;
-  background: transparent;
-  width: 100%;
-  outline: none;
-  padding: 0.25rem 0.5rem;
+.search-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
+  outline: none;
+  transition: all var(--transition-fast);
+  background-color: var(--input-bg-light);
+  color: var(--text-light);
 }
 
-.dark-mode .sidebar-search input {
+.dark-mode .search-input {
+  background-color: var(--input-bg-dark);
+  border-color: var(--border-color-dark);
   color: var(--text-dark);
+}
+
+.search-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.search-counter {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: var(--text-light-secondary);
+  background-color: var(--bg-light);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+}
+
+.dark-mode .search-counter {
+  color: var(--text-dark-secondary);
+  background-color: var(--bg-dark);
+}
+
+.search-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.search-nav-button, .search-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-light);
+  transition: all var(--transition-fast);
+}
+
+.dark-mode .search-nav-button, .dark-mode .search-close-button {
+  color: var(--text-dark);
+}
+
+.search-nav-button:hover, .search-close-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode .search-nav-button:hover, .dark-mode .search-close-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.search-nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Search highlighting in editor */
+.editor-textarea::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+.dark-mode .editor-textarea::selection {
+  background-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Search highlighting in preview */
+.search-highlight {
+  background-color: rgba(246, 213, 59, 0.3);
+  border-radius: 2px;
+}
+
+.dark-mode .search-highlight {
+  background-color: rgba(246, 213, 59, 0.4);
+}
+
+.search-highlight-active {
+  background-color: rgba(246, 158, 11, 0.5); 
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px rgba(246, 158, 11, 0.3);
+}
+
+.dark-mode .search-highlight-active {
+  background-color: rgba(246, 158, 11, 0.6);
+  box-shadow: 0 0 0 2px rgba(246, 158, 11, 0.4);
 }
 
 /* Tag styling */
@@ -1338,4 +1432,48 @@ textarea:focus, input:focus {
 
 .settings-btn:active {
   transform: translateY(0);
+}
+
+/* Sidebar search */
+.sidebar-search {
+  display: flex;
+  align-items: center;
+  background-color: var(--input-bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  transition: all var(--transition-normal);
+}
+
+.dark-mode .sidebar-search {
+  background-color: var(--input-bg-dark);
+  border-color: var(--border-color-dark);
+}
+
+.sidebar-search:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-outline);
+}
+
+.sidebar-search input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  outline: none;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.dark-mode .sidebar-search input {
+  color: var(--text-dark);
+}
+
+/* Remove obtrusive focus outline from preview when searching */
+.previewer-content:focus {
+  outline: none;
+}
+
+.previewer-content:focus-visible {
+  outline: 1px solid var(--primary-color);
 }

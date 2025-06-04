@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useCallback, memo, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import { useAppContext } from '../context/AppContext';
-import { IconEye, IconDownload } from '@tabler/icons-react';
+import { IconEye, IconDownload, IconSearch, IconX } from '@tabler/icons-react';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism.css';
 import 'prismjs/themes/prism-tomorrow.css';
@@ -23,6 +23,21 @@ import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-markdown';
 import 'prismjs/components/prism-yaml';
 
+// Add this declaration at the top of the file, after imports
+declare global {
+  interface Window {
+    find: (
+      searchString: string,
+      caseSensitive?: boolean,
+      backwards?: boolean,
+      wrapAround?: boolean,
+      wholeWord?: boolean,
+      searchInFrames?: boolean,
+      showDialog?: boolean
+    ) => boolean;
+  }
+}
+
 interface PreviewerProps {
   content: string;
   onScroll?: (scrollInfo: { scrollTop: number, scrollHeight: number, clientHeight: number }) => void;
@@ -37,19 +52,32 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
     darkMode,
   } = useAppContext();
   
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState<{ count: number, currentIndex: number }>({ count: 0, currentIndex: -1 });
+  const [markedContent, setMarkedContent] = useState(content);
+
   const previewerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const isScrolling = useRef(false);
   const contentRef = useRef(content);
-  
-  // Apply syntax highlighting after rendering with debouncing
+  const matchesRef = useRef<HTMLElement[]>([]);
+
+  // Focus search input when search is shown
   useEffect(() => {
-    // Only highlight if content actually changed
+    if (showSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [showSearch]);
+  
+  // Apply syntax highlighting after rendering
+  useEffect(() => {
     if (contentRef.current !== content) {
       contentRef.current = content;
+      setMarkedContent(content);
       
       // Use requestIdleCallback for better performance (or setTimeout as fallback)
       const highlightCode = () => {
-        // Only run Prism if the element is still in the DOM
         if (previewerRef.current && previewerRef.current.querySelectorAll('pre code').length > 0) {
           Prism.highlightAllUnder(previewerRef.current);
         }
@@ -62,6 +90,192 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
       }
     }
   }, [content]);
+
+  // Update search results after the preview content has been rendered
+  useEffect(() => {
+    if (!showSearch || !searchText || !previewerRef.current) {
+      return;
+    }
+
+    // Use a short delay to ensure the DOM is fully rendered
+    const timer = setTimeout(() => {
+      try {
+        // Focus on the preview container to ensure window.find only searches within it
+        previewerRef.current?.focus();
+        
+        // Count word occurrences in plain text (case insensitive)
+        const plainText = previewerRef.current?.textContent || '';
+        const regex = new RegExp(escapeRegExp(searchText), 'gi');
+        const occurrences = (plainText.match(regex) || []).length;
+        
+        setSearchResults({
+          count: occurrences,
+          currentIndex: occurrences > 0 ? 0 : -1
+        });
+        
+        // Prepare for navigation
+        if (occurrences > 0) {
+          // Clear any existing selection
+          if (window.getSelection) {
+            const selection = window.getSelection();
+            if (selection) selection.removeAllRanges();
+          }
+          
+          // Find the first match but don't scroll yet (wait for user navigation)
+          // This prevents auto-scrolling on every keystroke
+          collectMatchingNodes(searchText);
+        }
+      } catch (error) {
+        console.error("Error processing search:", error);
+      }
+    }, 200);
+    
+    return () => clearTimeout(timer);
+  }, [searchText, showSearch, content]);
+  
+  // Helper function to escape special characters in regex
+  const escapeRegExp = (string: string) => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  };
+
+  // Collect all matching nodes without affecting other components
+  const collectMatchingNodes = (text: string) => {
+    if (!previewerRef.current || !text) return [];
+    
+    // Get all text nodes within the preview container only
+    const textNodes: Node[] = [];
+    const findTextNodes = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+        textNodes.push(node);
+      } else {
+        node.childNodes.forEach(child => findTextNodes(child));
+      }
+    };
+    
+    findTextNodes(previewerRef.current);
+    
+    // Find nodes containing the search text
+    const matchingNodes: {node: Node, index: number}[] = [];
+    
+    textNodes.forEach(node => {
+      const content = node.textContent || '';
+      let index = content.toLowerCase().indexOf(text.toLowerCase());
+      while (index !== -1) {
+        matchingNodes.push({node, index});
+        index = content.toLowerCase().indexOf(text.toLowerCase(), index + 1);
+      }
+    });
+    
+    // Store matching nodes for navigation
+    matchesRef.current = matchingNodes.map(match => {
+      const element = match.node.parentElement as HTMLElement;
+      return element;
+    }).filter(Boolean);
+    
+    return matchingNodes;
+  };
+  
+  // Use browser's native find functionality to navigate between matches
+  const scrollToNextMatch = () => {
+    if (!searchText || searchResults.count === 0 || !previewerRef.current) return;
+    
+    // Focus the preview container to ensure search is constrained
+    previewerRef.current.focus();
+    
+    // Calculate new index
+    const nextIndex = (searchResults.currentIndex + 1) % searchResults.count;
+    setSearchResults(prev => ({ ...prev, currentIndex: nextIndex }));
+    
+    try {
+      // Use our custom search method that's constrained to the preview container
+      highlightTextInPreview(searchText, nextIndex);
+    } catch (error) {
+      console.error("Error navigating to next match:", error);
+    }
+  };
+  
+  const scrollToPrevMatch = () => {
+    if (!searchText || searchResults.count === 0 || !previewerRef.current) return;
+    
+    // Focus the preview container to ensure search is constrained
+    previewerRef.current.focus();
+    
+    // Calculate new index
+    const prevIndex = (searchResults.currentIndex - 1 + searchResults.count) % searchResults.count;
+    setSearchResults(prev => ({ ...prev, currentIndex: prevIndex }));
+    
+    try {
+      // Use our custom search method that's constrained to the preview container
+      highlightTextInPreview(searchText, prevIndex);
+    } catch (error) {
+      console.error("Error navigating to previous match:", error);
+    }
+  };
+  
+  // Method to find and scroll to text within the preview container only
+  const highlightTextInPreview = (text: string, targetIndex: number) => {
+    if (!previewerRef.current || !text) return;
+    
+    // Find all matching nodes
+    const matchingNodes = collectMatchingNodes(text);
+    
+    if (matchingNodes.length === 0) return;
+    
+    // Ensure target index is valid
+    if (targetIndex < 0 || targetIndex >= matchingNodes.length) {
+      targetIndex = 0;
+    }
+    
+    // Get the target match
+    const targetMatch = matchingNodes[targetIndex];
+    
+    if (targetMatch) {
+      // Create a selection on this text
+      const range = document.createRange();
+      range.setStart(targetMatch.node, targetMatch.index);
+      range.setEnd(targetMatch.node, targetMatch.index + text.length);
+      
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      
+      // Scroll the matched text into view
+      if (targetMatch.node.parentElement) {
+        targetMatch.node.parentElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    }
+  };
+  
+  // Toggle the search interface
+  const toggleSearch = () => {
+    setShowSearch(!showSearch);
+    if (!showSearch) {
+      setSearchText('');
+      setSearchResults({ count: 0, currentIndex: -1 });
+    }
+  };
+  
+  // Handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value);
+  };
+  
+  // Close search interface
+  const closeSearch = () => {
+    setShowSearch(false);
+    setSearchText('');
+    setSearchResults({ count: 0, currentIndex: -1 });
+    // Clear any selection
+    if (window.getSelection) {
+      const selection = window.getSelection();
+      if (selection) selection.removeAllRanges();
+    }
+  };
   
   // Optimized scroll handler with requestAnimationFrame
   const handleScroll = useCallback(() => {
@@ -173,6 +387,13 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
         <h3>Preview</h3>
         <div className="editor-actions">
           <button 
+            onClick={toggleSearch}
+            className="editor-action-button"
+            title="Search in preview"
+          >
+            <IconSearch size={18} />
+          </button>
+          <button 
             onClick={exportAsHTML}
             className="editor-action-button"
             title="Export as HTML"
@@ -181,6 +402,51 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
           </button>
         </div>
       </div>
+      
+      {showSearch && (
+        <div className="search-bar">
+          <div className="search-input-container">
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchText}
+              onChange={handleSearchChange}
+              placeholder="Search in preview..."
+              className="search-input"
+            />
+            {searchText && searchResults.count > 0 && (
+              <div className="search-counter">
+                {searchResults.currentIndex + 1} of {searchResults.count}
+              </div>
+            )}
+          </div>
+          <div className="search-actions">
+            <button 
+              onClick={scrollToPrevMatch}
+              disabled={searchResults.count === 0}
+              className="search-nav-button"
+              title="Previous match"
+            >
+              ↑
+            </button>
+            <button 
+              onClick={scrollToNextMatch}
+              disabled={searchResults.count === 0}
+              className="search-nav-button"
+              title="Next match"
+            >
+              ↓
+            </button>
+            <button 
+              onClick={closeSearch}
+              className="search-close-button"
+              title="Close search"
+            >
+              <IconX size={16} />
+            </button>
+          </div>
+        </div>
+      )}
       
       <div 
         ref={previewerRef} 
@@ -191,6 +457,7 @@ const Previewer = memo(({ content, onScroll, scrollToPosition }: PreviewerProps)
           lineHeight: '1.6',
           wordWrap: 'break-word'
         }}
+        tabIndex={0}
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
