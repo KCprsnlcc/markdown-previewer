@@ -23,18 +23,20 @@ const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorPr
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isScrolling = useRef(false);
   const previousValueRef = useRef(value);
+  const contentRef = useRef(content);
   
-  // Update local state when the prop changes
+  // Update local state ONLY when the content prop changes from outside
   useEffect(() => {
-    if (content !== value) {
+    if (content !== contentRef.current) {
       setValue(content);
+      contentRef.current = content;
     }
-  }, [content, value]);
+  }, [content]);
   
   // Handle auto-save functionality with debouncing
   useEffect(() => {
     // Only trigger if value has actually changed
-    if (autoSave && value !== content && previousValueRef.current !== value) {
+    if (autoSave && value !== contentRef.current && previousValueRef.current !== value) {
       previousValueRef.current = value;
       
       if (autoSaveTimerRef.current) {
@@ -43,6 +45,7 @@ const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorPr
       
       autoSaveTimerRef.current = setTimeout(() => {
         onChange(value);
+        contentRef.current = value;
       }, 500); // Reduced auto-save delay for better responsiveness
     }
     
@@ -51,7 +54,7 @@ const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorPr
         clearTimeout(autoSaveTimerRef.current);
       }
     };
-  }, [autoSave, value, content, onChange]);
+  }, [autoSave, value, onChange]);
 
   // Memoized scroll handler for better performance
   const handleScroll = useCallback(() => {
@@ -106,6 +109,7 @@ const Editor = memo(({ content, onChange, onScroll, scrollToPosition }: EditorPr
   const handleSave = useCallback(() => {
     try {
       onChange(value);
+      contentRef.current = value;
       showSuccess('Document saved successfully');
     } catch (error) {
       console.error('Error saving document:', error);

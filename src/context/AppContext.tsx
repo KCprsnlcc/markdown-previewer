@@ -131,7 +131,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setCurrentDocument(document);
   };
   
-  const createNewDocument = () => {
+  const createNewDocument = async () => {
     try {
       const newDocument: Partial<MarkdownDocument> = {
         id: crypto.randomUUID(),
@@ -140,13 +140,20 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         tags: [],
-        user_id: 'anonymous', // Replace with actual user ID if authentication is implemented
+        user_id: 'anonymous', // Will be replaced with actual user ID in saveDocument
       };
       
-      setCurrentDocument(newDocument as MarkdownDocument);
-      saveDocument(newDocument);
-      refreshDocuments();
-      showSuccess('New document created');
+      // First save the document to the database
+      const savedDocument = await saveDocument(newDocument);
+      
+      if (savedDocument) {
+        // Then set it as current document
+        setCurrentDocument(savedDocument);
+        await refreshDocuments();
+        showSuccess('New document created');
+      } else {
+        showError('Failed to create new document');
+      }
     } catch (error) {
       console.error('Error creating new document:', error);
       showError('Failed to create new document. Please try again.');

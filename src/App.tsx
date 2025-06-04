@@ -11,6 +11,7 @@ import { IconSettings, IconArrowUp, IconLogout } from '@tabler/icons-react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import { showError } from './utils/toast';
 
 const App: React.FC = () => {
   return (
@@ -128,9 +129,14 @@ const AppContent = memo(({
   }), []);
   
   // Memoize document change handler
-  const handleDocumentChange = useCallback((content: string) => {
+  const handleDocumentChange = useCallback(async (content: string) => {
     if (currentDocument) {
-      updateCurrentDocument(content);
+      try {
+        await updateCurrentDocument(content);
+      } catch (error) {
+        console.error('Error updating document:', error);
+        showError('Failed to update document. Please try again.');
+      }
     }
   }, [currentDocument, updateCurrentDocument]);
 

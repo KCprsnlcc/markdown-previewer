@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { IconSearch, IconPlus, IconTag, IconX, IconUpload, IconEdit, IconFilter } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconTag, IconX, IconUpload, IconEdit, IconFilter, IconTrash } from '@tabler/icons-react';
 import { MarkdownDocument } from '../supabase';
 import { showSuccess, showError, showInfo } from '../utils/toast';
 
@@ -206,6 +206,34 @@ const Sidebar: React.FC = () => {
     setRenamingDocId(null);
   };
   
+  const handleDeleteDocument = async (doc: MarkdownDocument, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent document selection when clicking delete
+    
+    if (window.confirm(`Are you sure you want to delete "${doc.title || 'Untitled'}"?`)) {
+      try {
+        // First, select the document to make it the current document
+        selectDocument(doc);
+        // Then delete it using the context function
+        await deleteCurrentDocument();
+      } catch (error) {
+        console.error('Error deleting document:', error);
+        showError('Failed to delete document. Please try again.');
+      }
+    }
+  };
+  
+  const safeSelectDocument = (doc: MarkdownDocument) => {
+    // First check if there are unsaved changes
+    const editorTextarea = window.document.querySelector('.editor-textarea') as HTMLTextAreaElement;
+    if (editorTextarea && currentDocument && editorTextarea.value !== currentDocument.content) {
+      if (window.confirm('You have unsaved changes. Do you want to discard them and switch documents?')) {
+        selectDocument(doc);
+      }
+    } else {
+      selectDocument(doc);
+    }
+  };
+  
   const sidebarStyle: React.CSSProperties = {
     width: '250px',
     height: '100%',
@@ -339,7 +367,13 @@ const Sidebar: React.FC = () => {
           {/* Documents actions */}
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
             <button 
-              onClick={() => createNewDocument()}
+              onClick={async () => {
+                try {
+                  await createNewDocument();
+                } catch (error) {
+                  console.error('Error creating document:', error);
+                }
+              }}
               className="add-document-btn"
               aria-label="Create new document"
             >
@@ -454,7 +488,7 @@ const Sidebar: React.FC = () => {
                 .map(doc => (
                   <div
                     key={doc.id}
-                    onClick={() => selectDocument(doc)}
+                    onClick={() => safeSelectDocument(doc)}
                     className={`document-item ${currentDocument?.id === doc.id ? 'active' : ''}`}
                   >
                     {renamingDocId === doc.id ? (
@@ -489,6 +523,13 @@ const Sidebar: React.FC = () => {
                             aria-label="Rename document"
                           >
                             <IconEdit size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteDocument(doc, e)}
+                            className="document-close-btn"
+                            aria-label="Delete document"
+                          >
+                            <IconTrash size={16} />
                           </button>
                         </div>
                       </>
