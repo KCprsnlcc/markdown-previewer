@@ -15,7 +15,7 @@ A powerful, feature-rich markdown editor and previewer built with React, TypeScr
   - Rename documents with inline editing
 - **UI Customization**:
   - Toggle visibility of editor, preview pane, and sidebar
-  - Dark mode support
+  - Dark mode support via Mantine UI
   - Responsive design for all screen sizes
 - **Organization**:
   - Tag-based document organization
@@ -23,12 +23,26 @@ A powerful, feature-rich markdown editor and previewer built with React, TypeScr
 - **Security**:
   - User authentication via Supabase
   - Enhanced error handling and debugging for auth issues
+- **Modern Interface**:
+  - Clean, intuitive UI powered by Mantine components
+  - Toasts for user feedback using react-toastify
+  - Icon support with Tabler icons
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, CSS
+- **Frontend**: 
+  - React 19
+  - TypeScript
+  - CSS
+  - Mantine UI Framework
 - **Backend/Database**: Supabase
-- **Markdown Parsing**: [React Markdown](https://github.com/remarkjs/react-markdown)
+- **Markdown Parsing**: 
+  - React Markdown 10
+  - Remark GFM (for GitHub Flavored Markdown)
+  - Rehype plugins for HTML handling
+- **Syntax Highlighting**: Prism.js
+- **Notifications**: React Toastify
+- **Analytics**: Vercel Analytics
 - **Build Tool**: Create React App
 
 ## Getting Started
@@ -84,17 +98,20 @@ markdown-previewer/
 ├── src/
 │   ├── components/
 │   │   ├── Auth.tsx           # Authentication component
+│   │   ├── Logo.tsx           # App logo component
 │   │   ├── Editor.tsx         # Markdown editing component
 │   │   ├── Previewer.tsx      # Markdown rendering component
 │   │   ├── SettingsPanel.tsx  # Settings management
 │   │   └── Sidebar.tsx        # Document navigation
 │   ├── context/
-│   │   └── AppContext.tsx     # State management
-│   ├── services/
-│   │   └── supabase.ts        # Database integration
-│   ├── App.css
-│   ├── App.tsx                # Main component
-│   └── index.tsx
+│   │   ├── AppContext.tsx     # Application state management
+│   │   └── AuthContext.tsx    # Authentication state management
+│   ├── utils/
+│   │   └── toast.ts           # Toast notification utilities
+│   ├── supabase.ts            # Supabase configuration and API
+│   ├── App.css                # Main stylesheet
+│   ├── App.tsx                # Main application component
+│   └── index.tsx              # Entry point
 └── package.json
 ```
 
