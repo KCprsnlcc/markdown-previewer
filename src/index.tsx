@@ -4,14 +4,20 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Analytics } from '@vercel/analytics/react';
+import { MantineProvider, createTheme } from '@mantine/core';
+import '@mantine/core/styles.css';
+
+const theme = createTheme({});
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
-    <Analytics />
+    <MantineProvider theme={theme}>
+      <App />
+      <Analytics />
+    </MantineProvider>
   </React.StrictMode>
 );
 

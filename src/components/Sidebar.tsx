@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { IconSearch, IconPlus, IconTag, IconX, IconUpload, IconEdit, IconFilter, IconTrash } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconTag, IconX, IconUpload, IconEdit, IconFilter, IconTrash, IconAlertTriangle } from '@tabler/icons-react';
 import { MarkdownDocument } from '../supabase';
 import { showSuccess, showError, showInfo } from '../utils/toast';
+import { Modal, Button, Group, Text } from '@mantine/core';
 
 const Sidebar: React.FC = () => {
   const {
@@ -27,6 +28,8 @@ const Sidebar: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [renamingDocId, setRenamingDocId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<MarkdownDocument | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
   
@@ -206,19 +209,26 @@ const Sidebar: React.FC = () => {
     setRenamingDocId(null);
   };
   
-  const handleDeleteDocument = async (doc: MarkdownDocument, e: React.MouseEvent) => {
+  const openDeleteModal = (doc: MarkdownDocument, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent document selection when clicking delete
-    
-    if (window.confirm(`Are you sure you want to delete "${doc.title || 'Untitled'}"?`)) {
-      try {
-        // First, select the document to make it the current document
-        selectDocument(doc);
-        // Then delete it using the context function
-        await deleteCurrentDocument();
-      } catch (error) {
-        console.error('Error deleting document:', error);
-        showError('Failed to delete document. Please try again.');
-      }
+    setDocumentToDelete(doc);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteDocument = async () => {
+    if (!documentToDelete) return;
+
+    try {
+      // First, select the document to make it the current document
+      selectDocument(documentToDelete);
+      // Then delete it using the context function
+      await deleteCurrentDocument();
+      showSuccess(`"${documentToDelete.title || 'Untitled'}" has been deleted`);
+      setDocumentToDelete(null);
+      setDeleteModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      showError('Failed to delete document. Please try again.');
     }
   };
   
@@ -346,6 +356,42 @@ const Sidebar: React.FC = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {/* Delete Confirmation Modal */}
+      <Modal
+        opened={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title={<Text size="lg" fw={700} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <IconAlertTriangle color="var(--danger-color)" size={20} />
+          Confirm Deletion
+        </Text>}
+        overlayProps={{
+          opacity: 0.55,
+          blur: 3,
+        }}
+        centered
+        withCloseButton
+        closeButtonProps={{
+          'aria-label': 'Close',
+        }}
+        radius="md"
+        size="md"
+      >
+        <div style={{ marginBottom: '1rem' }}>
+          <Text>
+            Are you sure you want to delete "<strong>{documentToDelete?.title || 'Untitled'}</strong>"? 
+            This action cannot be undone.
+          </Text>
+        </div>
+        <Group justify="flex-end" mt="xl">
+          <Button variant="default" onClick={() => setDeleteModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button color="red" onClick={handleDeleteDocument}>
+            Yes, Delete
+          </Button>
+        </Group>
+      </Modal>
+
       {isDragging ? (
         <div className="drag-active">
           <p>Drop markdown files here to import</p>
@@ -364,8 +410,8 @@ const Sidebar: React.FC = () => {
             />
           </form>
           
-          {/* Documents actions */}
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+          {/* Documents actions - Compact design */}
+          <div className="document-actions-container">
             <button 
               onClick={async () => {
                 try {
@@ -374,21 +420,24 @@ const Sidebar: React.FC = () => {
                   console.error('Error creating document:', error);
                 }
               }}
-              className="add-document-btn"
+              className="document-action-compact"
               aria-label="Create new document"
+              title="Create new document"
             >
-              <IconPlus size={18} /> New Document
+              <IconPlus size={16} />
+              <span>New</span>
             </button>
             
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="editor-action-button"
-              style={{ padding: '0.75rem', backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
+              className="document-action-compact"
               aria-label="Import markdown files"
               title="Import markdown files"
             >
-              <IconUpload size={18} />
+              <IconUpload size={16} />
+              <span>Import</span>
             </button>
+            
             <input
               type="file"
               ref={fileInputRef}
@@ -501,13 +550,16 @@ const Sidebar: React.FC = () => {
                           onBlur={() => cancelRenaming()}
                           style={{
                             border: 'none',
-                            borderBottom: `1px solid ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
-                            background: 'transparent',
-                            padding: '0.25rem 0',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderRadius: '6px',
+                            padding: '0.5rem',
                             outline: 'none',
                             color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
-                            width: '100%'
+                            width: '100%',
+                            fontWeight: '500',
+                            boxShadow: 'inset 0 0 0 1px var(--primary-light)',
                           }}
+                          autoFocus
                         />
                       </form>
                     ) : (
@@ -519,15 +571,17 @@ const Sidebar: React.FC = () => {
                         <div style={{ opacity: 0.7, fontSize: '0.75rem', marginLeft: '0.5rem', display: 'flex', gap: '0.5rem' }}>
                           <button
                             onClick={(e) => startRenaming(doc, e)}
-                            className="document-close-btn"
+                            className="document-action-btn"
                             aria-label="Rename document"
+                            title="Rename document"
                           >
                             <IconEdit size={16} />
                           </button>
                           <button
-                            onClick={(e) => handleDeleteDocument(doc, e)}
-                            className="document-close-btn"
+                            onClick={(e) => openDeleteModal(doc, e)}
+                            className="document-action-btn document-delete-btn"
                             aria-label="Delete document"
+                            title="Delete document"
                           >
                             <IconTrash size={16} />
                           </button>
