@@ -310,10 +310,62 @@ const AppContent = memo(({
               width: '100%',
               padding: '2rem',
               textAlign: 'center',
+              maxWidth: '650px',
+              margin: '0 auto'
             }}>
-              <Logo size="large" />
-              <h2 style={{ marginBottom: '1rem', marginTop: '1.5rem' }} className="slide-in">Welcome to MarkDown</h2>
-              <p className="slide-in" style={{ animationDelay: '0.1s' }}>Create a new document or select an existing one from the sidebar to get started.</p>
+              <h2 style={{ 
+                marginBottom: '0.75rem', 
+                marginTop: '0',
+                fontSize: '2.2rem',
+                fontWeight: 600,
+                background: 'linear-gradient(90deg, var(--primary-color), var(--accent-color, #7c4dff))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }} className="slide-in">Get Started</h2>
+              <p className="slide-in" style={{ 
+                animationDelay: '0.1s',
+                fontSize: '1.1rem',
+                lineHeight: '1.6',
+                opacity: 0.9,
+                maxWidth: '500px',
+                marginBottom: '2rem'
+              }}>
+                Create a new document or select an existing one from the sidebar to begin your markdown journey.
+              </p>
+              <div className="slide-in" style={{ 
+                display: 'flex', 
+                gap: '1rem', 
+                animationDelay: '0.2s',
+                marginTop: '0.5rem' 
+              }}>
+                <button 
+                  onClick={() => {
+                    const sidebar = document.querySelector('.sidebar');
+                    if (sidebar) {
+                      const newButton = sidebar.querySelector('button[aria-label="New Document"]');
+                      if (newButton) {
+                        (newButton as HTMLButtonElement).click();
+                      }
+                    }
+                  }}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '8px',
+                    backgroundColor: 'var(--primary-color)',
+                    color: '#fff',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontWeight: 500,
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  <span>New Document</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
