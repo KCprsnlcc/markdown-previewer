@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { IconSearch, IconPlus, IconTag, IconX, IconUpload, IconEdit, IconFilter, IconTrash, IconAlertTriangle } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconX, IconUpload, IconEdit, IconFilter, IconTrash, IconAlertTriangle } from '@tabler/icons-react';
 import { MarkdownDocument } from '../supabase';
-import { showSuccess, showError, showInfo } from '../utils/toast';
+import { showSuccess, showError } from '../utils/toast';
 import { Modal, Button, Group, Text } from '@mantine/core';
 
 const Sidebar: React.FC = () => {
@@ -254,93 +254,9 @@ const Sidebar: React.FC = () => {
     color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
   };
   
-  const headerStyle: React.CSSProperties = {
-    padding: '1rem',
-    borderBottom: '1px solid var(--border-color)',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  };
-  
-  const searchContainerStyle: React.CSSProperties = {
-    padding: '1rem',
-    borderBottom: '1px solid var(--border-color)',
-  };
-  
-  const searchInputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '0.5rem',
-    border: '1px solid var(--border-color)',
-    borderRadius: '8px',
-    backgroundColor: darkMode ? 'var(--input-bg-dark)' : 'var(--input-bg-light)',
-    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
-  };
-  
-  const tagsContainerStyle: React.CSSProperties = {
-    padding: '1rem',
-    borderBottom: '1px solid var(--border-color)',
-  };
-  
-  const tagStyle = (isSelected: boolean): React.CSSProperties => ({
-    display: 'inline-block',
-    margin: '0.25rem',
-    padding: '0.25rem 0.5rem',
-    borderRadius: '8px',
-    backgroundColor: isSelected 
-      ? (darkMode ? 'var(--primary-color)' : 'var(--primary-light)') 
-      : (darkMode ? 'var(--tag-bg-dark)' : 'var(--tag-bg-light)'),
-    color: isSelected 
-      ? '#fff' 
-      : (darkMode ? 'var(--text-dark)' : 'var(--text-light)'),
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-  });
-  
-  const documentListStyle: React.CSSProperties = {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '0.5rem',
-  };
-  
-  const documentItemStyle = (isSelected: boolean): React.CSSProperties => ({
-    padding: '0.75rem 1rem',
-    margin: '0.25rem 0',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    backgroundColor: isSelected 
-      ? (darkMode ? 'var(--bg-dark-selected)' : 'var(--bg-light-selected)') 
-      : 'transparent',
-    color: isSelected 
-      ? '#fff' 
-      : (darkMode ? 'var(--text-dark)' : 'var(--text-light)'),
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  });
-  
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: 'var(--primary-color)',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '0.5rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  };
 
-  const iconButtonStyle: React.CSSProperties = {
-    background: 'none',
-    border: 'none',
-    color: darkMode ? 'var(--text-dark)' : 'var(--text-light)',
-    cursor: 'pointer',
-    padding: '2px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '8px',
-  };
+  
+
   
   return (
     <div 
