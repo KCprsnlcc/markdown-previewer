@@ -876,13 +876,6 @@ textarea:focus, input:focus {
 /* Mobile phones */
 @media (max-width: 576px) {
   /* Force icons to be visible in mobile view */
-  svg {
-    visibility: visible !important;
-    opacity: 1 !important;
-    display: inline-block !important;
-    width: initial !important;
-    height: initial !important;
-  }
   
   /* Specific icon sizes for better appearance */
   .header-action-button svg {
@@ -928,49 +921,6 @@ textarea:focus, input:focus {
     gap: 0.5rem;
   }
   
-  .header-action-button {
-    padding: 0;
-    width: 40px;
-    height: 40px;
-    justify-content: center;
-    border-radius: 50%;
-    min-width: unset;
-    transform-origin: center;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-    display: flex;
-    align-items: center;
-  }
-  
-  .header-action-button svg {
-    width: 20px;
-    height: 20px;
-    opacity: 1;
-    display: block;
-  }
-  
-  .header-button-text {
-    display: none;
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
-  }
-  
-  .signout-button {
-    background-color: rgba(0, 0, 0, 0.05);
-    border: none;
-  }
-  
-  .settings-button {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .dark-mode .signout-button {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .header-action-button:active {
-    transform: scale(0.95);
-  }
   
   .mobile-sidebar-header {
     display: flex;
@@ -1068,10 +1018,20 @@ textarea:focus, input:focus {
   
   .toolbar-mobile-toggle {
     display: flex !important;
-    background-color: rgba(0, 0, 0, 0.05);
-    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
     width: 40px;
     height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    background-color: transparent;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .dark-mode .toolbar-mobile-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.05);
   }
 
   .split-view {
@@ -1161,8 +1121,7 @@ textarea:focus, input:focus {
   }
   
   /* Fix icon visibility for all mobile buttons */
-  button svg, 
-  .header-action-button svg,
+  button svg,
   .document-action-button svg,
   .mobile-close-button svg {
     width: auto;
@@ -1177,7 +1136,7 @@ textarea:focus, input:focus {
     height: 20px;
     display: block;
   }
-}
+} /* Closing brace for @media (max-width: 576px) starting at line 877 */
 
 /* Tablets */
 @media (min-width: 577px) and (max-width: 768px) {
@@ -1700,17 +1659,23 @@ textarea:focus, input:focus {
 }
 
 /* App header styling */
+/* Remastered App Header Styles */
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--bg-light);
-  transition: padding 0.3s ease;
-  position: relative;
-  z-index: 10;
+  padding: 0.5rem 1rem; /* Adjusted padding */
   height: 60px;
+  background-color: var(--bg-light);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky; /* Make header sticky on mobile */
+  top: 0;
+  z-index: 100; /* Ensure header is above other content */
+}
+
+.dark-mode .app-header {
+  background-color: var(--bg-dark);
+  border-bottom-color: var(--border-color-dark);
 }
 
 .header-left {
@@ -1719,93 +1684,105 @@ textarea:focus, input:focus {
   gap: 0.75rem;
 }
 
-.dark-mode .app-header {
-  background-color: var(--bg-dark);
-}
-
 .header-actions {
   display: flex;
-  gap: 0.75rem;
   align-items: center;
+  gap: 0.5rem; /* Adjusted gap for mobile */
 }
 
-.header-action-button {
+.header-icon-button {
+  background-color: transparent;
+  border: none;
+  color: var(--text-light);
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  height: 38px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.header-button-text {
-  display: inline-block;
-  transition: opacity 0.3s ease;
+.header-icon-button svg {
+  width: 20px;
+  height: 20px;
+  display: block; /* Ensure SVG is block for consistent rendering */
+  visibility: visible; /* Ensure visibility */
+  opacity: 1; /* Ensure opacity */
 }
 
-.signout-button {
-  background-color: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-light);
-}
-
-.dark-mode .signout-button {
+.dark-mode .header-icon-button {
   color: var(--text-dark);
 }
 
-.settings-button {
-  background-color: var(--primary-color);
-  color: #fff;
-  border: none;
-}
-
-.header-action-button:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.signout-button:hover {
+.header-icon-button:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-.dark-mode .signout-button:hover {
+.dark-mode .header-icon-button:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-.settings-button:hover {
-  background-color: var(--primary-dark);
+.header-icon-button .header-button-text {
+  display: none; /* Hidden on mobile by default */
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Styles for desktop view */
+@media (min-width: 769px) {
+  .app-header {
+    padding: 0.75rem 1.5rem; /* Slightly more padding on desktop */
+    position: relative; /* Not sticky on desktop */
+  }
+
+  .header-actions {
+    gap: 0.75rem; /* Larger gap on desktop */
+  }
+
+  .header-icon-button {
+    width: auto; /* Auto width to accommodate text */
+    height: 38px; /* Standard button height */
+    padding: 0.5rem 1rem; /* Padding for text */
+    border-radius: var(--radius-md); /* Standard border radius */
+  }
+  
+  .header-icon-button.signout-button-desktop {
+    border: 1px solid var(--border-color);
+  }
+  .dark-mode .header-icon-button.signout-button-desktop {
+    border-color: var(--border-color-dark);
+  }
+  .header-icon-button.settings-button-desktop {
+    background-color: var(--primary-color);
+    color: #fff;
+  }
+  .dark-mode .header-icon-button.settings-button-desktop {
+     background-color: var(--primary-dark); /* Or a dark mode primary color */
+  }
+   .header-icon-button.settings-button-desktop:hover {
+    background-color: var(--primary-dark);
+  }
+  .dark-mode .header-icon-button.settings-button-desktop:hover {
+    background-color: var(--primary-color); /* Lighter hover for dark mode */
+  }
+
+
+  .header-icon-button .header-button-text {
+    display: inline-block; /* Show text on desktop */
+  }
 }
 
 /* Improved toolbar mobile toggle */
 .toolbar-mobile-toggle {
-  display: none;
+  display: none; /* Hidden by default, shown in mobile media query */
+  /* Base styles for alignment and cursor, specific sizing/appearance in media query */
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 8px;
-  margin-right: 0.75rem;
   cursor: pointer;
-  color: var(--text-light);
-  transition: background-color 0.2s ease;
-  width: 40px;
-  height: 40px;
-}
-
-.dark-mode .toolbar-mobile-toggle {
-  color: var(--text-dark);
-}
-
-.toolbar-mobile-toggle:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.dark-mode .toolbar-mobile-toggle:hover {
-  background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* Hamburger menu animation */
@@ -1981,75 +1958,5 @@ textarea:focus, input:focus {
   background-color: var(--bg-dark-hover);
 }
 
-@media (max-width: 576px) {
-  /* Mobile-specific fixes for icon visibility */
-  svg {
-    display: inline-block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  
-  /* Fix all buttons in mobile view to ensure icons are visible */
-  button svg,
-  .header-action-button svg,
-  .document-action-button svg,
-  .mobile-close-button svg,
-  .document-action-btn svg {
-    display: block !important;
-    width: auto;
-    height: auto;
-    opacity: 1;
-    visibility: visible;
-  }
-  
-  /* Ensure the New Document button icon is visible */
-  .slide-in button svg {
-    display: inline-block !important;
-  }
-}
 
-/* Hamburger menu animation - ensure visibility */
-.hamburger-icon {
-  width: 20px;
-  height: 20px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  transition: transform 0.3s ease;
-}
 
-.hamburger-icon span {
-  display: block;
-  width: 100%;
-  height: 2px;
-  background-color: currentColor;
-  border-radius: 2px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@media (max-width: 576px) {
-  .toolbar-mobile-toggle {
-    display: flex !important;
-    background-color: rgba(0, 0, 0, 0.05);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-  }
-  
-  .dark-mode .toolbar-mobile-toggle {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .hamburger-icon {
-    display: flex !important;
-  }
-  
-  .hamburger-icon span {
-    width: 100% !important;
-    height: 2px !important;
-    background-color: currentColor !important;
-    margin: 2px 0 !important;
-    display: block !important;
-  }
-}

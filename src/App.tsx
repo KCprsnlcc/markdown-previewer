@@ -266,7 +266,7 @@ const AppContent = memo(({
             <div className="header-actions">
               <button
                 onClick={() => signOut()}
-                className="header-action-button signout-button"
+                className="header-icon-button signout-button-desktop"
                 aria-label="Sign Out"
                 title="Sign Out"
               >
@@ -275,7 +275,7 @@ const AppContent = memo(({
               </button>
               <button
                 onClick={() => setSettingsPanelOpen(true)}
-                className="header-action-button settings-button"
+                className="header-icon-button settings-button-desktop"
                 aria-label="Settings"
                 title="Settings"
               >
