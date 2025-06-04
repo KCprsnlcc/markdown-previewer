@@ -245,7 +245,7 @@ const Sidebar: React.FC = () => {
   };
   
   const sidebarStyle: React.CSSProperties = {
-    width: '250px',
+    width: '240px',
     height: '100%',
     borderRight: '1px solid var(--border-color)',
     display: 'flex',
@@ -323,11 +323,12 @@ const Sidebar: React.FC = () => {
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Search documents..."
               aria-label="Search documents"
+              style={{ fontSize: '0.9rem', padding: '0.4rem 0' }}
             />
           </form>
           
           {/* Documents actions - Compact design */}
-          <div className="document-actions-container">
+          <div className="document-actions-container" style={{ padding: '0.5rem 0.75rem' }}>
             <button 
               onClick={async () => {
                 try {
@@ -337,8 +338,15 @@ const Sidebar: React.FC = () => {
                 }
               }}
               className="document-action-compact"
-              aria-label="Create new document"
+              aria-label="New Document"
               title="Create new document"
+              style={{ 
+                padding: '0.45rem 0.75rem', 
+                fontSize: '0.9rem',
+                display: 'flex',
+                alignItems: 'center', 
+                gap: '0.5rem' 
+              }}
             >
               <IconPlus size={16} />
               <span>New</span>
@@ -349,6 +357,13 @@ const Sidebar: React.FC = () => {
               className="document-action-compact"
               aria-label="Import markdown files"
               title="Import markdown files"
+              style={{ 
+                padding: '0.45rem 0.75rem', 
+                fontSize: '0.9rem',
+                display: 'flex',
+                alignItems: 'center', 
+                gap: '0.5rem' 
+              }}
             >
               <IconUpload size={16} />
               <span>Import</span>
@@ -365,7 +380,7 @@ const Sidebar: React.FC = () => {
           </div>
           
           {/* Tags filter */}
-          <div className="sidebar-section-title">
+          <div className="sidebar-section-title" style={{ padding: '0.75rem 1rem 0.35rem', fontSize: '0.9rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <IconFilter size={16} />
               <span>Filter by Tags</span>
@@ -418,7 +433,7 @@ const Sidebar: React.FC = () => {
           </div>
           
           {/* Documents list */}
-          <div className="sidebar-section-title" style={{ marginTop: '1.5rem' }}>
+          <div className="sidebar-section-title" style={{ marginTop: '1rem', padding: '0.75rem 1rem 0.35rem', fontSize: '0.9rem' }}>
             Documents {isLoading && <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>(loading...)</span>}
           </div>
           

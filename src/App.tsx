@@ -7,7 +7,7 @@ import Previewer from './components/Previewer';
 import SettingsPanel from './components/SettingsPanel';
 import Logo from './components/Logo';
 import Auth from './components/Auth';
-import { IconSettings, IconArrowUp, IconLogout } from '@tabler/icons-react';
+import { IconSettings, IconArrowUp, IconLogout, IconPlus } from '@tabler/icons-react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -308,15 +308,15 @@ const AppContent = memo(({
               justifyContent: 'center',
               height: '100%',
               width: '100%',
-              padding: '2rem',
+              padding: '3rem',
               textAlign: 'center',
-              maxWidth: '650px',
+              maxWidth: '700px',
               margin: '0 auto'
             }}>
               <h2 style={{ 
-                marginBottom: '0.75rem', 
+                marginBottom: '1rem', 
                 marginTop: '0',
-                fontSize: '2.2rem',
+                fontSize: '2.5rem',
                 fontWeight: 600,
                 background: 'linear-gradient(90deg, var(--primary-color), var(--accent-color, #7c4dff))',
                 WebkitBackgroundClip: 'text',
@@ -325,11 +325,11 @@ const AppContent = memo(({
               }} className="slide-in">Get Started</h2>
               <p className="slide-in" style={{ 
                 animationDelay: '0.1s',
-                fontSize: '1.1rem',
-                lineHeight: '1.6',
+                fontSize: '1.2rem',
+                lineHeight: '1.7',
                 opacity: 0.9,
-                maxWidth: '500px',
-                marginBottom: '2rem'
+                maxWidth: '550px',
+                marginBottom: '3rem'
               }}>
                 Create a new document or select an existing one from the sidebar to begin your markdown journey.
               </p>
@@ -350,19 +350,21 @@ const AppContent = memo(({
                     }
                   }}
                   style={{
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '8px',
+                    padding: '0.85rem 2rem',
+                    borderRadius: '10px',
                     backgroundColor: 'var(--primary-color)',
                     color: '#fff',
                     border: 'none',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
+                    gap: '0.75rem',
                     fontWeight: 500,
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    fontSize: '1.1rem',
+                    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)'
                   }}
                 >
+                  <IconPlus size={20} />
                   <span>New Document</span>
                 </button>
               </div>

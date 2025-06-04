@@ -355,25 +355,28 @@ div:hover > .document-action-btn {
 /* Compact document actions */
 .document-actions-container {
   display: flex;
-  gap: 0.5rem;
-  margin: 0.75rem 0;
+  justify-content: space-between;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.75rem;
 }
 
 .document-action-compact {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-light);
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  background-color: var(--bg-light-hover);
-  border: 1px solid var(--border-color);
+  padding: 0.55rem;
   border-radius: var(--radius-md);
-  padding: 0.5rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-light);
-  transition: all var(--transition-fast);
   cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  font-weight: 500;
+  margin: 0 0.35rem;
+  font-size: 0.9rem;
 }
 
 .dark-mode .document-action-compact {
@@ -656,8 +659,16 @@ textarea:focus, input:focus {
 
 /* Document item styling */
 .document-item {
-  border-left: 3px solid transparent;
-  transition: all var(--transition-fast);
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .document-item:hover {
@@ -695,40 +706,6 @@ textarea:focus, input:focus {
   background-color: var(--bg-dark);
   border-right: 1px solid var(--border-color-dark);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-/* Document item in sidebar */
-.document-item {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: transparent;
-}
-
-.document-item:hover {
-  background-color: var(--bg-light-hover);
-  transform: translateY(-1px);
-}
-
-.document-item.active {
-  background-color: var(--bg-light-selected);
-  color: var(--primary-color);
-  font-weight: 600;
-}
-
-.dark-mode .document-item:hover {
-  background-color: var(--bg-dark-hover);
-}
-
-.dark-mode .document-item.active {
-  background-color: var(--bg-dark-selected);
-  color: var(--primary-light);
 }
 
 /* Search bar styling */
@@ -864,21 +841,20 @@ textarea:focus, input:focus {
 .tag-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem 0.75rem;
 }
 
 .tag {
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  display: inline-flex;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.65rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-light);
+  border-radius: var(--radius-sm);
+  display: flex;
   align-items: center;
-  transition: all var(--transition-fast);
-  background-color: var(--tag-bg-light);
-  color: var(--text-light-secondary);
   cursor: pointer;
-  font-weight: 500;
+  transition: background-color var(--transition-fast);
 }
 
 .dark-mode .tag {
@@ -905,12 +881,13 @@ textarea:focus, input:focus {
 
 /* Sidebar section title */
 .sidebar-section-title {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  margin: 1.5rem 0 0.75rem;
   color: var(--text-light-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  padding: 0.85rem 0.85rem 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .dark-mode .sidebar-section-title {
@@ -1436,14 +1413,13 @@ textarea:focus, input:focus {
 
 /* Sidebar search */
 .sidebar-search {
+  padding: 0.65rem 0.75rem;
   display: flex;
   align-items: center;
-  background-color: var(--input-bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-full);
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 1rem;
-  transition: all var(--transition-normal);
+  gap: 0.65rem;
+  background-color: var(--bg-light);
+  border-radius: var(--radius-md);
+  margin: 0.65rem 0.75rem;
 }
 
 .dark-mode .sidebar-search {
